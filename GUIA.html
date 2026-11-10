@@ -1,0 +1,2304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMTP2Graph — Setup guide / Guia de configuração</title>
+<style>:root{--azul:#0f6cbd;--azul-claro:#ebf3fc;--texto:#242424;--cinza:#616161;--borda:#e0e0e0;--fundo:#fafafa;--codigo:#1e1e1e}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,sans-serif;color:var(--texto);background:var(--fundo);line-height:1.65;font-size:16px}
+nav.lateral{position:fixed;top:0;left:0;bottom:0;width:270px;background:#fff;border-right:1px solid var(--borda);padding:22px 14px;overflow-y:auto}
+nav.lateral .marca{font-weight:700;font-size:19px;color:var(--azul);padding:0 10px}
+nav.lateral .sub{font-size:13px;color:var(--cinza);padding:0 10px 14px;border-bottom:1px solid var(--borda);margin-bottom:10px}
+nav.lateral a{display:block;padding:7px 10px;border-radius:6px;color:var(--texto);text-decoration:none;font-size:14px}
+nav.lateral a:hover{background:var(--fundo)}
+nav.lateral a.ativo{background:var(--azul-claro);color:var(--azul);font-weight:600}
+main.conteudo{margin-left:270px;max-width:980px;padding:36px 48px 80px}
+h1{font-size:30px;line-height:1.25;margin:0 0 12px;color:var(--azul)}
+h2{font-size:23px;margin:48px 0 14px;padding-top:12px;border-top:1px solid var(--borda)}
+h3{font-size:18px;margin:34px 0 10px;background:var(--azul-claro);color:var(--azul);padding:9px 14px;border-radius:6px}
+hr{display:none}
+a{color:var(--azul)}
+code{font-family:"Cascadia Code",Consolas,monospace;font-size:.88em;background:#f0f0f0;padding:1px 5px;border-radius:4px}
+pre{position:relative;background:var(--codigo);color:#e6e6e6;padding:16px 18px;border-radius:8px;overflow-x:auto;font-size:13.5px;line-height:1.5}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+button.copiar{position:absolute;top:8px;right:8px;background:#3a3a3a;color:#fff;border:0;border-radius:4px;padding:4px 10px;font-size:12px;cursor:pointer;opacity:.8}
+button.copiar:hover{opacity:1}
+.tabela{overflow-x:auto;margin:14px 0;border:1px solid var(--borda);border-radius:8px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th{background:#f3f3f3;text-align:left;font-weight:600}
+th,td{padding:9px 12px;border-bottom:1px solid var(--borda);vertical-align:top}
+tr:last-child td{border-bottom:0}
+blockquote{margin:16px 0;padding:12px 16px;background:#fff8e6;border-left:4px solid #f2a900;border-radius:0 6px 6px 0}
+blockquote p{margin:6px 0}
+ol li,ul li{margin:4px 0}
+li.task{list-style:none;margin-left:-22px}
+li.task input{transform:scale(1.2);margin-right:8px;accent-color:var(--azul)}
+@media (max-width:900px){nav.lateral{display:none}main.conteudo{margin-left:0;padding:20px}}
+@media print{nav.lateral,button.copiar{display:none}main.conteudo{margin:0;max-width:none}}
+h4{font-size:16.5px;margin:28px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--azul-claro);color:#333}
+
+.centro{text-align:center}
+.topo{margin-bottom:8px}.topo img{margin:3px}
+.topo h1{font-size:40px;margin:14px 0 4px}
+.idiomas{display:flex;gap:6px;padding:0 6px 14px;border-bottom:1px solid var(--borda);margin-bottom:10px}
+.idiomas button{flex:1;border:1px solid var(--borda);background:#fff;border-radius:6px;padding:7px 4px;cursor:pointer;font:inherit;font-size:13px}
+.idiomas button.ativo{background:var(--azul);color:#fff;border-color:var(--azul);font-weight:600}
+section[data-lang]{display:none} section[data-lang].visivel{display:block}
+nav.lateral div[data-lang]{display:none} nav.lateral div[data-lang].visivel{display:block}
+</style>
+</head>
+<body>
+<nav class="lateral">
+  <div class="marca">📨 SMTP2Graph</div>
+  <div class="sub">Setup guide · Guia de configuração</div>
+  <div class="idiomas">
+    <button data-set="en">🇺🇸 English</button>
+    <button data-set="pt">🇧🇷 Português</button>
+  </div>
+  <div data-lang="en"><a href="#1-what-it-is-and-how-it-works">What it is and how it works</a>
+<a href="#2-what-is-in-this-folder">What is in this folder</a>
+<a href="#3-before-you-start">Before you start</a>
+<a href="#part-a--configure-microsoft-365">Part A — Configure Microsoft 365</a>
+<a href="#part-b--hashicorp-vault-and-the-bridge">Part B — HashiCorp Vault and the bridge</a>
+<a href="#part-c--test-with-the-test-application">Part C — Test with the test application</a>
+<a href="#part-d--connect-the-production-application">Part D — Connect the production application</a>
+<a href="#day-to-day-maintenance">Day-to-day maintenance</a>
+<a href="#important-limits">Important limits</a>
+<a href="#troubleshooting">Troubleshooting</a>
+<a href="#glossary">Glossary</a></div>
+  <div data-lang="pt"><a href="#1-o-que-é-e-como-funciona">O que é e como funciona</a>
+<a href="#2-o-que-tem-nesta-pasta">O que tem nesta pasta</a>
+<a href="#3-antes-de-começar">Antes de começar</a>
+<a href="#parte-a--configurar-o-microsoft-365">Parte A — Configurar o Microsoft 365</a>
+<a href="#parte-b--hashicorp-vault-e-a-ponte">Parte B — HashiCorp Vault e a ponte</a>
+<a href="#parte-c--testar-com-a-aplicação-de-teste">Parte C — Testar com a aplicação de teste</a>
+<a href="#parte-d--ligar-a-aplicação-de-produção">Parte D — Ligar a aplicação de produção</a>
+<a href="#manutenção-do-dia-a-dia">Manutenção do dia a dia</a>
+<a href="#limites-importantes">Limites importantes</a>
+<a href="#solução-de-problemas">Solução de problemas</a>
+<a href="#glossário">Glossário</a></div>
+</nav>
+<main class="conteudo">
+<div class="topo"><p class="centro">
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/HashiCorp-000000?style=for-the-badge&logo=hashicorp&logoColor=white" alt="HashiCorp">
+  <img src="https://img.shields.io/badge/IBM-052FAD?style=for-the-badge&logo=ibm&logoColor=white" alt="IBM">
+  <img src="https://img.shields.io/badge/Microsoft-0078D4?style=for-the-badge&logo=microsoft&logoColor=white" alt="Microsoft">
+</p>
+
+<h1 class="centro">SMTP2Graph</h1>
+
+<p class="centro">
+  <b>SMTP → Microsoft Graph bridge, with credentials protected by HashiCorp Vault</b><br>
+  <i>Ponte SMTP → Microsoft Graph, com credenciais protegidas pelo HashiCorp Vault</i>
+</p></div>
+<section data-lang="en" lang="en"><h1 id="english">English</h1>
+<p>A complete, step-by-step guide for letting an application that <strong>only supports SMTP settings</strong> (ERP, invoice issuer, legacy system) send e-mail to <strong>external customers</strong> through <strong>Microsoft 365</strong>, using modern authentication (OAuth). The Service Principal credentials are protected in <strong>HashiCorp Vault</strong>. It runs on <strong>Windows</strong> (Docker Desktop) and on <strong>Linux</strong> (Docker Engine): every step shows the commands for both.</p>
+
+<h2 id="1-what-it-is-and-how-it-works">1. What it is and how it works</h2>
+<p>Think of the bridge as a <strong>"translator"</strong>. Your application speaks SMTP, the "old language" of e-mail. Microsoft prefers the Graph API with OAuth, the "new", more secure language. The bridge sits in the middle and translates. The <strong>vault</strong> stores the "key" the bridge uses to sign in to Microsoft.</p>
+<pre><code> ┌───────────────┐ SMTP (port 25)  ┌───────────────┐   AppRole    ┌─────────────────┐
+ │ Your app      │ ──────────────► │  SMTP2Graph   │ ───────────► │ HashiCorp Vault │
+ │ (ERP/invoices)│                 │   (Docker)    │ ◄─────────── │ Tenant/Client ID│
+ └───────────────┘                 └───────┬───────┘  credentials │ and secret      │
+                                           │                      └─────────────────┘
+                                           │ HTTPS + OAuth (Microsoft Graph)
+                                           ▼
+ ┌───────────────┐                 ┌───────────────┐
+ │ External      │ ◄────────────── │ Microsoft 365 │
+ │ customer      │ e-mail+invoice  │ notas@company │
+ └───────────────┘                 └───────────────┘
+</code></pre>
+<p><strong>The three containers:</strong></p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Container</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>smtp2graph-vault</code></td>
+<td><strong>HashiCorp Vault</strong>, a secrets vault. It stores the Service Principal's Tenant ID, Client ID and secret, encrypted</td>
+</tr>
+<tr>
+<td><code>smtp2graph-vault-unseal</code></td>
+<td>(Optional) Unseals Vault automatically when the computer restarts</td>
+</tr>
+<tr>
+<td><code>smtp2graph</code></td>
+<td>The <strong>bridge</strong>: receives SMTP from the application and delivers it to Microsoft through Graph</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>What the bridge does with each e-mail:</strong></p>
+<ol>
+<li>Receives the e-mail from the application over SMTP.</li>
+<li>Checks three things: the <strong>bridge username/password</strong>, whether the <strong>sender</strong> is the allowed mailbox (e.g. <code>notas@suaempresa.com.br</code>), and whether the connection comes from an <strong>allowed network</strong>.</li>
+<li>Uses the Service Principal credentials <strong>read from Vault</strong> to request a <strong>token</strong> (a ~1-hour "pass") from Microsoft.</li>
+<li>Delivers the <strong>whole e-mail, with attachments</strong>, to Microsoft through the Graph API.</li>
+<li>Tells the application whether it worked (<code>250</code>), whether to retry later (<code>451</code>) or whether something must be fixed (<code>550</code>).</li>
+</ol>
+<p><strong>Why this is secure:</strong></p>
+<ul>
+<li>The <strong>Service Principal secret is never stored in a text file</strong>. It is encrypted inside Vault.</li>
+<li>The bridge signs in to Vault with an <strong>AppRole</strong> that has <strong>READ-only</strong> access to a single path (<code>secret/smtp2graph/entra</code>).</li>
+<li>The Entra ID app can only send <strong>from the invoice mailbox</strong>, thanks to RBAC for Applications (Step 4).</li>
+<li>The application <strong>never knows any Microsoft 365 password</strong>.</li>
+<li>Vault <strong>only accepts connections from this machine</strong> (<code>127.0.0.1</code>) and from the internal Docker network.</li>
+<li>To <strong>rotate</strong> the Service Principal secret, just update it in Vault. The bridge picks it up within 5 minutes, with no restart.</li>
+</ul>
+<blockquote>
+<p>ℹ️ <strong>HashiCorp Vault</strong> is a HashiCorp product. HashiCorp has been an <strong>IBM</strong> company since 2025. This project uses the free Community edition.</p>
+</blockquote>
+<h2 id="2-what-is-in-this-folder">2. What is in this folder</h2>
+<pre><code>D:\SMTP2Graph\
+├── README.md                ← this guide (English and Portuguese)
+├── GUIA.html                ← the same guide, for the browser
+├── docker-compose.yml       ← starts Vault + auto-unseal + bridge (PRODUCTION)
+├── .env.example             ← configuration template (copy to .env); contains NO secrets
+├── .gitignore / .gitattributes
+├── ponte\                   ← the bridge program (Python, commented)
+│   ├── smtp2graph.py
+│   ├── healthcheck.py
+│   ├── requirements.txt
+│   └── Dockerfile
+├── vault\
+│   ├── config\vault.hcl     ← Vault server configuration
+│   ├── auto-unseal.sh       ← unseals Vault after a restart (optional)
+│   ├── approle\             ← receives role_id and secret_id (the bridge's Vault login)
+│   └── unseal\              ← receives unseal.key (only if auto-unseal is enabled)
+├── certs\                   ← (optional) certificates to encrypt SMTP
+├── scripts\                  ← Windows (.ps1) and Linux (.sh)
+│   ├── 1-configurar-permissao-exchange.ps1 / .sh  ← Step 4, Option A (RBAC, recommended)
+│   ├── 1b-permissao-via-graph.ps1 / .sh           ← Step 4, Option B (Microsoft Graph)
+│   ├── 2-configurar-vault.ps1 / .sh               ← sets up Vault and stores the Service Principal (Step 8)
+│   ├── 3-liberar-firewall-windows.ps1             ← firewall on Windows (Step 10)
+│   └── 3-liberar-firewall-linux.sh                ← firewall on Linux (Step 10)
+└── app-teste\               ← TEST application with an SMTP settings screen
+</code></pre>
+<h2 id="3-before-you-start">3. Before you start</h2>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>What</th>
+<th>Why</th>
+<th>How to check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🪟 <strong>Docker Desktop</strong> installed and running</td>
+<td>To run Vault, the bridge and the test app</td>
+<td>PowerShell: <code>docker version</code> (must show <em>Client</em> and <em>Server</em>)</td>
+</tr>
+<tr>
+<td>🐧 <strong>Docker Engine</strong> + <strong>compose plugin</strong>, <strong>curl</strong></td>
+<td>Same, on Linux</td>
+<td><code>docker compose version</code> and <code>curl --version</code></td>
+</tr>
+<tr>
+<td>🐧 (optional) <strong>PowerShell 7</strong> (<code>pwsh</code>)</td>
+<td>Step 4 on Linux. Or run Step 4 from any Windows PC</td>
+<td><code>pwsh --version</code></td>
+</tr>
+<tr>
+<td>🐧 (optional) <strong>Azure CLI</strong> (<code>az</code>)</td>
+<td>Step 4, Option B on Linux</td>
+<td><code>az version</code></td>
+</tr>
+<tr>
+<td><strong>Exchange Administrator</strong> account</td>
+<td>To create the mailbox and grant the permission</td>
+<td>Microsoft 365 admin → Roles</td>
+</tr>
+<tr>
+<td><strong>Application Administrator</strong> (or Global) account</td>
+<td>To register the app in Entra ID</td>
+<td>Entra admin → Roles</td>
+</tr>
+<tr>
+<td>Access to the domain's <strong>DNS</strong></td>
+<td>SPF, DKIM and DMARC (anti-spam)</td>
+<td>Your DNS provider</td>
+</tr>
+<tr>
+<td>This machine's <strong>internal IP</strong></td>
+<td>The application will point to it</td>
+<td>PowerShell: <code>ipconfig</code> → "IPv4 Address"</td>
+</tr>
+<tr>
+<td>A <strong>password manager</strong> (Bitwarden, 1Password, KeePass...)</td>
+<td>To store Vault's unseal key and root token</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>🪟 Windows or 🐧 Linux?</strong> The examples use <code>D:\SMTP2Graph</code> on Windows and <code>/opt/smtp2graph</code> on Linux. To move the folder from a Windows PC to a Linux server:</p>
+<pre><code class="language-powershell">scp -r D:\SMTP2Graph usuario@servidor:/opt/smtp2graph
+</code></pre>
+<p>On Linux, run the scripts with <code>bash scripts/&lt;name&gt;.sh</code>. Scripts that need administrator rights ask for <code>sudo</code> by themselves.</p>
+<blockquote>
+<p>⚠️ <strong>Production on Windows:</strong> Docker Desktop only starts <strong>after someone signs in to Windows</strong>. For real production, use an <strong>always-on server</strong>: Linux with Docker Engine, or Windows with automatic sign-in and Docker Desktop set to start with it (<em>Settings → General → Start Docker Desktop when you sign in</em>).</p>
+</blockquote>
+<p><strong>Write these down as you go</strong> (you will type them in Step 8):</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sending mailbox</td>
+<td><code>notas@suaempresa.com.br</code></td>
+</tr>
+<tr>
+<td>Directory (Tenant) ID</td>
+<td></td>
+</tr>
+<tr>
+<td>Application (Client) ID</td>
+<td></td>
+</tr>
+<tr>
+<td>Object ID (from <em>Enterprise applications</em>)</td>
+<td></td>
+</tr>
+<tr>
+<td>Secret value (Client Secret)</td>
+<td></td>
+</tr>
+<tr>
+<td>Secret expiry date</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="part-a--configure-microsoft-365">Part A — Configure Microsoft 365</h2>
+<h3 id="step-1--create-the-sending-mailbox">Step 1 — Create the sending mailbox</h3>
+<p>We will create a <strong>shared mailbox</strong>. It needs no license and nobody signs in to it: it is just the "official sender" of the invoices.</p>
+<ol>
+<li>Go to <strong>https://admin.exchange.microsoft.com</strong>.</li>
+<li>Open <strong>Recipients → Mailboxes → Add a shared mailbox</strong>.</li>
+<li><strong>Display name:</strong> <code>Notas Fiscais - Your Company</code>. <strong>Address:</strong> <code>notas@suaempresa.com.br</code>.</li>
+<li>Click <strong>Create</strong>.</li>
+<li>(Recommended) Add as <strong>members</strong> the people who should see customer replies.</li>
+</ol>
+<h3 id="step-2--register-the-app-in-entra-id">Step 2 — Register the app in Entra ID</h3>
+<p>The "app" (Service Principal) is the <strong>bridge's identity</strong> inside Microsoft, like a badge.</p>
+<ol>
+<li>Go to <strong>https://entra.microsoft.com</strong> → <strong>Identity → Applications → App registrations → + New registration</strong>.</li>
+<li><strong>Name:</strong> <code>SMTP2Graph - Invoice Sending</code>. <strong>Account types:</strong> <em>This organizational directory only</em>. <strong>Redirect URI:</strong> leave empty.</li>
+<li>Click <strong>Register</strong>. On <strong>Overview</strong>, write down:<ul>
+<li><strong>Application (client) ID</strong> → the <em>Client ID</em></li>
+<li><strong>Directory (tenant) ID</strong> → the <em>Tenant ID</em></li>
+</ul>
+</li>
+<li>Go to <strong>Identity → Applications → Enterprise applications</strong>, open the app and write down its <strong>Object ID</strong>.</li>
+</ol>
+<blockquote>
+<p>⚠️ The "Object ID" under <em>App registrations</em> is <strong>different</strong> from the one under <em>Enterprise applications</em>. Use the one from <strong>Enterprise applications</strong>.</p>
+</blockquote>
+<h3 id="step-3--create-the-app-secret">Step 3 — Create the app secret</h3>
+<ol>
+<li><strong>App registrations</strong> → your app → <strong>Certificates &amp; secrets → + New client secret</strong>.</li>
+<li>Description: <code>smtp2graph-production</code>. Expiry: up to 24 months.</li>
+<li><strong>Copy the "Value" column IMMEDIATELY</strong>, because it is only shown now. Do not confuse it with the "Secret ID".</li>
+</ol>
+<blockquote>
+<p>🔐 This value goes into <strong>Vault</strong> in Step 8. After that, <strong>delete it</strong> from your notes.</p>
+<p>📅 Set a calendar reminder <strong>30 days before it expires</strong>.</p>
+</blockquote>
+<p><strong>API permissions: do NOT add anything.</strong> Do not grant <code>Mail.Send</code> under <em>API permissions</em>, because that would let the app send e-mail <strong>as anyone in the company</strong>. The permission is granted in the next step, <strong>scoped to the invoice mailbox</strong>.</p>
+<h3 id="step-4--grant-send-permission-only-for-the-invoice-mailbox">Step 4 — Grant send permission ONLY for the invoice mailbox</h3>
+<p>The app needs permission to <strong>send mail</strong>, but only <strong>as the invoice mailbox</strong>. There are two ways to do it. <strong>Pick ONE.</strong></p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th></th>
+<th>Option A — RBAC for Applications</th>
+<th>Option B — Microsoft Graph commands</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Where the permission lives</td>
+<td>Exchange Online</td>
+<td>Entra ID (Microsoft Graph)</td>
+</tr>
+<tr>
+<td>Default reach</td>
+<td><strong>Only</strong> the invoice mailbox</td>
+<td><strong>ALL</strong> mailboxes in the company</td>
+</tr>
+<tr>
+<td>How it is restricted</td>
+<td>Built in (management scope)</td>
+<td>Application Access Policy (legacy)</td>
+</tr>
+<tr>
+<td>Microsoft's recommendation</td>
+<td>✅ Recommended</td>
+<td>⚠️ Microsoft advises against creating new Application Access Policies</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>🛑 <strong>Do not mix them.</strong> If Mail.Send is granted in Entra ID (Option B), it applies to the whole company and the Exchange scope from Option A <strong>no longer limits anything</strong>. Using Option A? Make sure Mail.Send is <strong>not</strong> granted in Entra ID. Use the check at the end of this step.</p>
+<p>ℹ️ This step does <strong>not</strong> need to run on the Docker server. You can run it from any administrator PC.</p>
+</blockquote>
+<h4 id="option-a--rbac-for-applications-recommended">Option A — RBAC for Applications (recommended)</h4>
+<p>🪟 <strong>Windows (PowerShell):</strong></p>
+<pre><code class="language-powershell">cd D:\SMTP2Graph\scripts
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\1-configurar-permissao-exchange.ps1 `
+    -AppId    &quot;APPLICATION-ID&quot; `
+    -ObjectId &quot;OBJECT-ID-FROM-ENTERPRISE-APPLICATIONS&quot; `
+    -Caixa    &quot;notas@suaempresa.com.br&quot;
+</code></pre>
+<p>🐧 <strong>Linux (bash + PowerShell 7):</strong></p>
+<pre><code class="language-bash">cd /opt/smtp2graph
+bash scripts/1-configurar-permissao-exchange.sh \
+    -AppId    &quot;APPLICATION-ID&quot; \
+    -ObjectId &quot;OBJECT-ID-FROM-ENTERPRISE-APPLICATIONS&quot; \
+    -Caixa    &quot;notas@suaempresa.com.br&quot;
+</code></pre>
+<p>On Linux, sign-in uses a <strong>code</strong>: open the link shown on any computer and type the code. If <code>pwsh</code> is not installed, the script shows how to install it.</p>
+<p>Sign in with the <strong>Exchange Administrator</strong> account. Expected result at the end: <strong>InScope = True</strong>.</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Command the script runs</th>
+<th>In plain English</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>New-ServicePrincipal</code></td>
+<td>"Exchange, meet the SMTP2Graph app."</td>
+</tr>
+<tr>
+<td><code>New-ManagementScope</code></td>
+<td>"Create a group containing <strong>only</strong> the <code>notas@...</code> mailbox."</td>
+</tr>
+<tr>
+<td><code>New-ManagementRoleAssignment</code></td>
+<td>"Give the app <strong>send mail</strong> permission, only inside that group."</td>
+</tr>
+<tr>
+<td><code>Test-ServicePrincipalAuthorization</code></td>
+<td>"Check that it is right."</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="option-b--microsoft-graph-commands">Option B — Microsoft Graph commands</h4>
+<p>Here the permission is granted directly on the app in Entra ID, with Microsoft Graph commands. Technically this creates an <strong>app role assignment</strong> of <code>Mail.Send</code> (type <em>Application</em>) from the "Microsoft Graph" Service Principal to your app. It is the same as clicking <strong>API permissions → Add → Mail.Send → Grant admin consent</strong> in the portal, only by command.</p>
+<p><strong>B.1 — Grant Mail.Send</strong></p>
+<p>🪟 <strong>Windows — Microsoft Graph PowerShell:</strong></p>
+<pre><code class="language-powershell">Install-Module Microsoft.Graph.Applications -Scope CurrentUser
+# Sign in with a Global Administrator or Privileged Role Administrator account
+Connect-MgGraph -Scopes &quot;Application.Read.All&quot;,&quot;AppRoleAssignment.ReadWrite.All&quot;
+
+# &quot;Microsoft Graph&quot; Service Principal (its appId is the same in every tenant)
+$graphSp  = Get-MgServicePrincipal -Filter &quot;appId eq '00000003-0000-0000-c000-000000000000'&quot;
+# The Mail.Send permission of type Application
+$mailSend = $graphSp.AppRoles | Where-Object { $_.Value -eq &quot;Mail.Send&quot; -and $_.AllowedMemberTypes -contains &quot;Application&quot; }
+# YOUR app's Service Principal
+$appSp    = Get-MgServicePrincipal -Filter &quot;appId eq 'APPLICATION-ID'&quot;
+
+New-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $appSp.Id `
+    -PrincipalId $appSp.Id -ResourceId $graphSp.Id -AppRoleId $mailSend.Id
+</code></pre>
+<p>🐧 <strong>Linux — Azure CLI calling the Graph API:</strong></p>
+<pre><code class="language-bash">az login --use-device-code --allow-no-subscriptions
+
+GRAPH_SP=$(az ad sp show --id 00000003-0000-0000-c000-000000000000 --query id -o tsv)
+MAIL_SEND=$(az ad sp show --id 00000003-0000-0000-c000-000000000000 \
+  --query &quot;appRoles[?value=='Mail.Send' &amp;&amp; contains(allowedMemberTypes,'Application')].id | [0]&quot; -o tsv)
+APP_SP=$(az ad sp show --id APPLICATION-ID --query id -o tsv)
+
+az rest --method POST \
+  --uri &quot;https://graph.microsoft.com/v1.0/servicePrincipals/$APP_SP/appRoleAssignments&quot; \
+  --headers &quot;Content-Type=application/json&quot; \
+  --body &quot;{\&quot;principalId\&quot;:\&quot;$APP_SP\&quot;,\&quot;resourceId\&quot;:\&quot;$GRAPH_SP\&quot;,\&quot;appRoleId\&quot;:\&quot;$MAIL_SEND\&quot;}&quot;
+</code></pre>
+<blockquote>
+<p>⚠️ After B.1, the app can send as <strong>anyone in the company</strong>. Do B.2 right away.</p>
+</blockquote>
+<p><strong>B.2 — Restrict to the invoice mailbox (Application Access Policy)</strong></p>
+<p>These commands (<code>New-DistributionGroup</code>, <code>New-ApplicationAccessPolicy</code>, <code>Test-ApplicationAccessPolicy</code>) are <strong>not</strong> Microsoft Graph commands. They belong to <strong>Exchange Online PowerShell</strong>. The <code>Connect-MgGraph</code> sign-in from B.1 does <strong>not</strong> work for them: you need a <strong>separate sign-in to Exchange Online</strong>.</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>What</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Module</td>
+<td><code>ExchangeOnlineManagement</code> (install once)</td>
+</tr>
+<tr>
+<td>Sign-in command</td>
+<td><code>Connect-ExchangeOnline</code></td>
+</tr>
+<tr>
+<td>Account</td>
+<td>A Microsoft 365 user with the <strong>Exchange Administrator</strong> role (or Global Administrator)</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>Runs in PowerShell 5.1 or 7. A Microsoft sign-in window opens</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>Runs in <code>pwsh</code> with <code>-Device</code>: open the link on any computer and type the code</td>
+</tr>
+</tbody>
+</table></div>
+<pre><code class="language-powershell"># 1) Install the module (first time only)
+Install-Module ExchangeOnlineManagement -Scope CurrentUser
+
+# 2) Sign in to Exchange Online with the Exchange Administrator account
+Connect-ExchangeOnline -UserPrincipalName admin@suaempresa.com.br
+#    Linux (pwsh): Connect-ExchangeOnline -UserPrincipalName admin@suaempresa.com.br -Device
+
+# Mail-enabled security group containing only the invoice mailbox
+New-DistributionGroup -Name &quot;SMTP2Graph - Remetentes&quot; -Alias smtp2graph-remetentes `
+    -Type Security -Members notas@suaempresa.com.br
+
+# The app can only reach members of that group
+New-ApplicationAccessPolicy -AppId APPLICATION-ID `
+    -PolicyScopeGroupId smtp2graph-remetentes@suaempresa.com.br `
+    -AccessRight RestrictAccess -Description &quot;SMTP2Graph: invoice mailbox only&quot;
+
+# Test: Granted for the invoice mailbox, Denied for any other
+Test-ApplicationAccessPolicy -Identity notas@suaempresa.com.br -AppId APPLICATION-ID
+Test-ApplicationAccessPolicy -Identity your.name@suaempresa.com.br -AppId APPLICATION-ID
+</code></pre>
+<p><strong>Ready-made scripts for Option B</strong> (they do B.1 and B.2, with confirmations):</p>
+<pre><code class="language-powershell"># Windows
+.\1b-permissao-via-graph.ps1 -AppId &quot;APPLICATION-ID&quot; -Acao Conceder -Caixa &quot;notas@suaempresa.com.br&quot;
+</code></pre>
+<pre><code class="language-bash"># Linux
+bash scripts/1b-permissao-via-graph.sh conceder   APPLICATION-ID
+bash scripts/1b-permissao-via-graph.sh restringir APPLICATION-ID notas@suaempresa.com.br
+</code></pre>
+<h4 id="check-with-microsoft-graph-recommended-for-both-options">Check with Microsoft Graph (recommended for both options)</h4>
+<p>This shows whether the app has Mail.Send granted in Entra ID:</p>
+<pre><code class="language-powershell">.\1b-permissao-via-graph.ps1 -AppId &quot;APPLICATION-ID&quot; -Acao Verificar        # Windows
+</code></pre>
+<pre><code class="language-bash">bash scripts/1b-permissao-via-graph.sh verificar APPLICATION-ID              # Linux
+</code></pre>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Your choice</th>
+<th>Expected result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Option A (RBAC)</td>
+<td><code>Mail.Send (Entra): not granted</code>. If it shows <strong>GRANTED</strong>, remove it with <code>-Acao Remover</code> / <code>remover</code></td>
+</tr>
+<tr>
+<td>Option B (Graph)</td>
+<td><code>Mail.Send (Entra): GRANTED</code>, <strong>and</strong> <code>Test-ApplicationAccessPolicy</code> = <code>Granted</code> for the invoice mailbox only</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>⏳ Either way, the permission can take <strong>30 minutes to 2 hours</strong> to take effect.</p>
+</blockquote>
+<blockquote>
+<p>🔄 <strong>After changing any permission in this step, restart the bridge:</strong> <code>docker compose restart smtp2graph</code>. The bridge reuses its Microsoft access token for up to about 1 hour, so a permission granted after its last sign-in only applies after a restart. If the error continues, wait for propagation and restart again.</p>
+</blockquote>
+<blockquote>
+<p>⚠️ <strong>Option B needs B.1 AND B.2.</strong> B.2 (Application Access Policy) only <em>restricts</em>; it grants nothing. <code>Test-ApplicationAccessPolicy</code> says <code>Granted</code> even when Mail.Send was never granted, so always confirm with <code>-Acao Verificar</code>. And <code>Test-ServicePrincipalAuthorization</code> only applies to Option A: with Option B it says "couldn't be found", which is normal.</p>
+</blockquote>
+<h3 id="step-5--configure-dns-to-stay-out-of-spam">Step 5 — Configure DNS (to stay out of spam)</h3>
+<p><strong>SPF</strong>: the domain's TXT record (only one is allowed):</p>
+<pre><code>v=spf1 include:spf.protection.outlook.com -all
+</code></pre>
+<p><strong>DKIM</strong>: at <strong>https://security.microsoft.com</strong> → <strong>Email &amp; collaboration → Policies &amp; rules → Threat policies → Email authentication settings → DKIM</strong>. Create in DNS the two CNAME records the screen shows (<code>selector1._domainkey</code> and <code>selector2._domainkey</code>), then enable signing.</p>
+<p><strong>DMARC</strong>: a TXT record named <code>_dmarc</code>:</p>
+<pre><code>v=DMARC1; p=none; rua=mailto:dmarc@suaempresa.com.br
+</code></pre>
+<p>After a few weeks without problems, change it to <code>p=quarantine</code>.</p>
+<h2 id="part-b--hashicorp-vault-and-the-bridge">Part B — HashiCorp Vault and the bridge</h2>
+<h3 id="step-6--fill-in-the-env-file-no-secrets">Step 6 — Fill in the .env file (no secrets!)</h3>
+<p>🪟 <strong>Windows:</strong></p>
+<pre><code class="language-powershell">cd D:\SMTP2Graph
+Copy-Item .env.example .env
+notepad .env
+</code></pre>
+<p>🐧 <strong>Linux:</strong></p>
+<pre><code class="language-bash">cd /opt/smtp2graph
+cp .env.example .env
+chmod 600 .env
+nano .env
+</code></pre>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>What to enter</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ALLOWED_SENDERS</code></td>
+<td>The invoice mailbox (several: comma-separated)</td>
+<td><code>notas@suaempresa.com.br</code></td>
+</tr>
+<tr>
+<td><code>SMTP_USERNAME</code></td>
+<td>A username <strong>you make up</strong> for the application</td>
+<td><code>app-notas</code></td>
+</tr>
+<tr>
+<td><code>SMTP_PASSWORD</code></td>
+<td>A password <strong>you make up</strong> (12+ characters)</td>
+<td><code>Gere-Uma-Senha-Sua-2026</code></td>
+</tr>
+<tr>
+<td><code>VAULT_ADDR</code></td>
+<td>Vault address (do not change)</td>
+<td><code>http://vault:8200</code></td>
+</tr>
+<tr>
+<td><code>VAULT_REFRESH_SECONDS</code></td>
+<td>How often the bridge re-reads Vault</td>
+<td><code>300</code> (5 min)</td>
+</tr>
+<tr>
+<td><code>ALLOWED_NETWORKS</code></td>
+<td>Allowed IP ranges</td>
+<td>leave as is</td>
+</tr>
+<tr>
+<td><code>LOG_LEVEL</code></td>
+<td><code>INFO</code> normally, <code>DEBUG</code> for troubleshooting</td>
+<td><code>INFO</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>🔐 The <strong>Tenant ID, Client ID and secret do NOT go in <code>.env</code></strong>: they go into Vault in Step 8.</p>
+<p>🔐 <code>SMTP_USERNAME</code> and <code>SMTP_PASSWORD</code> are <strong>not Microsoft 365 credentials</strong>. They are a "front-door password" between the application and the bridge.</p>
+</blockquote>
+<h3 id="step-7--start-the-containers">Step 7 — Start the containers</h3>
+<pre><code class="language-powershell">cd D:\SMTP2Graph            # Linux: cd /opt/smtp2graph
+docker compose up -d --build
+docker compose ps
+</code></pre>
+<p>On Linux, if you get <code>permission denied ... docker.sock</code>, put <code>sudo</code> in front of the <code>docker</code> commands (or add your user to the <code>docker</code> group).</p>
+<p>At this point it is <strong>normal</strong> to see:</p>
+<ul>
+<li><code>smtp2graph-vault</code> as <strong>unhealthy</strong>: Vault has not been initialized yet. It becomes <em>healthy</em> after Step 8.</li>
+<li>The bridge waiting for Vault. Check it with <code>docker compose logs smtp2graph</code>:</li>
+</ul>
+<pre><code>INFO    Credenciais do Service Principal: HashiCorp Vault (http://vault:8200)
+WARNING Aguardando o Vault: o Vault está SELADO (sealed)... Nova tentativa em 15s.
+</code></pre>
+<p>(The bridge logs are in Portuguese. "Aguardando o Vault" means "waiting for Vault".)</p>
+<h3 id="step-8--set-up-vault-and-store-the-service-principal">Step 8 — Set up Vault and store the Service Principal</h3>
+<p>This is the main step. The script does everything and <strong>asks for the Service Principal data</strong>.</p>
+<p>🪟 <strong>Windows:</strong></p>
+<pre><code class="language-powershell">cd D:\SMTP2Graph\scripts
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\2-configurar-vault.ps1
+</code></pre>
+<p>🐧 <strong>Linux:</strong></p>
+<pre><code class="language-bash">cd /opt/smtp2graph
+sudo bash scripts/2-configurar-vault.sh
+</code></pre>
+<p>Both versions ask the same questions and have the same menu. The Linux version uses the Vault CLI <strong>inside</strong> the container, so the server only needs Docker and curl. It also sets the owner of the <code>vault/approle</code> files so the bridge can read them.</p>
+<p><strong>What happens, in order:</strong></p>
+<ol>
+<li>
+<p><strong>Vault initialization.</strong> The script shows <strong>two values that are displayed ONLY ONCE</strong>:</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Value</th>
+<th>What it is for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unseal key</strong></td>
+<td>Unlocks Vault after every restart. <strong>Without it, the data in Vault can never be recovered</strong></td>
+</tr>
+<tr>
+<td><strong>Root token</strong></td>
+<td>Vault's "administrator password". You will use it to update the secret in the future</td>
+</tr>
+</tbody>
+</table></div>
+<p>👉 <strong>Store both in your password manager</strong> and type <code>OK</code>. The screen is cleared right after.</p>
+</li>
+<li>
+<p><strong>Automatic configuration:</strong> the script creates the <code>secret/</code> store, the read-only <code>smtp2graph-read</code> policy and the bridge's AppRole, and saves <code>role_id</code> and <code>secret_id</code> in <code>vault\approle\</code>.</p>
+</li>
+<li>
+<p><strong>Auto-unseal:</strong> the script asks whether Vault should <strong>unseal itself</strong> after a restart.</p>
+<ul>
+<li><strong>Yes (recommended for an unattended server):</strong> the key is saved in <code>vault\unseal\unseal.key</code> (on Linux, with <code>chmod 600</code>).</li>
+<li><strong>No (more secure):</strong> after each restart, run the script and choose <strong>option 2</strong> to unseal.</li>
+</ul>
+</li>
+<li>
+<p><strong>Service Principal data:</strong> the script asks for:</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Prompt</th>
+<th>What to type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Tenant ID</code></td>
+<td>Directory ID (Step 2)</td>
+</tr>
+<tr>
+<td><code>Client ID</code></td>
+<td>Application ID (Step 2)</td>
+</tr>
+<tr>
+<td><code>Client Secret VALUE</code></td>
+<td>The secret <strong>Value</strong> (Step 3). Typing is <strong>hidden</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Before saving, the script <strong>tests the sign-in to Microsoft</strong>. If you see <strong>[OK] Sign-in succeeded</strong>, the credentials are stored in Vault at <code>secret/smtp2graph/entra</code>.</p>
+</li>
+</ol>
+<blockquote>
+<p>⚖️ <strong>About auto-unseal:</strong> it is convenient, but anyone who can read the <code>vault\unseal\</code> folder <strong>and</strong> the Docker volume can open the vault. Protect <code>D:\SMTP2Graph</code> (Properties → Security: Administrators only). On Linux: <code>sudo chown -R root:root /opt/smtp2graph/vault/unseal &amp;&amp; sudo chmod 700 /opt/smtp2graph/vault/unseal</code>. For maximum security, leave it off and unseal manually. An advanced alternative is auto-unseal with Azure Key Vault (<code>seal "azurekeyvault"</code> in <code>vault.hcl</code>).</p>
+</blockquote>
+<h3 id="step-9--check-that-the-bridge-started">Step 9 — Check that the bridge started</h3>
+<pre><code class="language-powershell">docker compose ps
+docker compose logs --tail 20 smtp2graph
+</code></pre>
+<p>All three containers should be <strong>Up</strong>, with <code>smtp2graph-vault</code> and <code>smtp2graph</code> <strong>healthy</strong>. What you <strong>want to see</strong> in the log:</p>
+<pre><code>INFO    Credenciais do Service Principal: HashiCorp Vault (http://vault:8200)
+INFO    Login na Microsoft (OAuth) OK para o app e5f6a7b8-...
+INFO    Ouvindo SMTP em 0.0.0.0:2525
+INFO    Autenticação SMTP: LIGADA | TLS (STARTTLS): desligado
+</code></pre>
+<p>("Login na Microsoft OK" = Microsoft sign-in OK; "Ouvindo SMTP" = listening for SMTP.)</p>
+<p>And port 25 responding:</p>
+<pre><code class="language-powershell">Test-NetConnection -ComputerName localhost -Port 25      # Windows → TcpTestSucceeded : True
+</code></pre>
+<pre><code class="language-bash">nc -zv 127.0.0.1 25                                       # Linux   → succeeded / open
+</code></pre>
+<h3 id="step-10--firewall-only-if-the-application-runs-on-another-machine">Step 10 — Firewall (only if the application runs on ANOTHER machine)</h3>
+<p>🪟 <strong>Windows</strong> — open PowerShell <strong>as Administrator</strong>:</p>
+<pre><code class="language-powershell">cd D:\SMTP2Graph\scripts
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\3-liberar-firewall-windows.ps1 -RedeOrigem &quot;192.168.0.0/24&quot;
+</code></pre>
+<p>🐧 <strong>Linux:</strong></p>
+<pre><code class="language-bash">cd /opt/smtp2graph
+sudo bash scripts/3-liberar-firewall-linux.sh 192.168.0.0/24,172.16.0.0/12 --persistir
+</code></pre>
+<ul>
+<li><code>192.168.0.0/24</code> = your network (or just the application's IP). Separate several with commas.</li>
+<li><code>172.16.0.0/12</code> = Docker's internal networks. Include it if you will use the test app, or an application in Docker on the same server.</li>
+<li><code>--persistir</code> = re-apply the rule after a reboot (it creates the <code>smtp2graph-firewall</code> systemd service).</li>
+<li>To undo: <code>sudo bash scripts/3-liberar-firewall-linux.sh --remover</code></li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>Linux: <code>ufw</code> and <code>firewalld</code> do NOT protect ports published by Docker.</strong> Docker writes its own iptables rules first. That is why the script uses Docker's own chain for this (<code>DOCKER-USER</code>).</p>
+<p>🚫 <strong>Never</strong> port-forward port 25 on your router. The bridge is for <strong>internal</strong> use only.</p>
+<p>ℹ️ On <strong>Docker Desktop (Windows)</strong>, the bridge sees every connection as coming from Docker itself, so <code>ALLOWED_NETWORKS</code> in <code>.env</code> cannot filter by the real IP. On <strong>Linux</strong> the bridge sees the real IP, so <code>ALLOWED_NETWORKS</code> also works as an extra layer.</p>
+</blockquote>
+<h2 id="part-c--test-with-the-test-application">Part C — Test with the test application</h2>
+<h3 id="step-11--start-the-test-app-and-send">Step 11 — Start the test app and send</h3>
+<pre><code class="language-powershell">cd D:\SMTP2Graph\app-teste      # Linux: cd /opt/smtp2graph/app-teste
+docker compose up -d --build
+</code></pre>
+<p>Open <strong>http://localhost:8080</strong> (on a Linux server without a browser, use <strong>http://SERVER-IP:8080</strong> from your PC) and fill in:</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Servidor SMTP (SMTP server)</td>
+<td><code>host.docker.internal</code> (pre-filled; means "this computer")</td>
+</tr>
+<tr>
+<td>Porta (Port)</td>
+<td><code>25</code></td>
+</tr>
+<tr>
+<td>Usuário / Senha (Username / Password)</td>
+<td><code>SMTP_USERNAME</code> and <code>SMTP_PASSWORD</code> from <code>.env</code></td>
+</tr>
+<tr>
+<td>Segurança (Security)</td>
+<td><code>Nenhuma</code> (none — internal network)</td>
+</tr>
+<tr>
+<td>Remetente (Sender)</td>
+<td><code>notas@suaempresa.com.br</code></td>
+</tr>
+<tr>
+<td>Destino (Recipient)</td>
+<td><strong>one of your own e-mails outside the company</strong> (Gmail, Outlook.com...)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Two extra buttons help before sending:</p>
+<ul>
+<li><strong>Testar comunicação</strong> (test connection): connects to the bridge, does the security and the sign-in, and asks whether the sender is accepted, <strong>without sending any e-mail</strong>. It does <strong>not</strong> check the Microsoft 365 permission (Step 4); that only shows up when you send.</li>
+<li><strong>Salvar configurações</strong> (save settings): keeps the fields filled in the next time you open the page (stored in the <code>smtp2graph-app-teste-dados</code> Docker volume). The password is only saved if you tick <strong>Salvar também a senha</strong>; it is then stored as plain text inside the container.</li>
+</ul>
+<p>Click <strong>Enviar nota fiscal de teste</strong> (send test invoice). <strong>Expected:</strong> a green banner, and the e-mail arrives with <code>DANFE_000123.pdf</code> and <code>NFe_000123.xml</code>.</p>
+<p>In Gmail, open <strong>⋮ → Show original</strong> and check that it shows <strong>SPF: PASS</strong>, <strong>DKIM: PASS</strong> and <strong>DMARC: PASS</strong>.</p>
+<p><strong>Security tests (recommended):</strong></p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Expected result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wrong password</td>
+<td>❌ <code>535 Authentication credentials invalid</code></td>
+</tr>
+<tr>
+<td>No username</td>
+<td>❌ <code>530 Authentication required</code></td>
+</tr>
+<tr>
+<td>Sender <code>diretor@suaempresa.com.br</code></td>
+<td>❌ <code>550 ... nao autorizado nesta ponte</code> (not allowed)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Stop the test app when you are done: <code>docker compose down</code>, inside the <code>app-teste</code> folder.</p>
+<h2 id="part-d--connect-the-production-application">Part D — Connect the production application</h2>
+<h3 id="step-12--configure-the-real-application">Step 12 — Configure the real application</h3>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Application field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SMTP server / Host</strong></td>
+<td>This machine's IP (e.g. <code>192.168.0.50</code>), or <code>localhost</code> if the app runs here</td>
+</tr>
+<tr>
+<td><strong>Port</strong></td>
+<td><code>25</code></td>
+</tr>
+<tr>
+<td><strong>Username / Password</strong></td>
+<td><code>SMTP_USERNAME</code> / <code>SMTP_PASSWORD</code> from <code>.env</code></td>
+</tr>
+<tr>
+<td><strong>SSL/TLS</strong></td>
+<td>None (STARTTLS only if you configured <code>certs\</code>)</td>
+</tr>
+<tr>
+<td><strong>Sender (From)</strong></td>
+<td><code>notas@suaempresa.com.br</code>, <strong>exactly</strong> the allowed mailbox</td>
+</tr>
+<tr>
+<td><strong>Reply-To</strong></td>
+<td>optional, e.g. <code>financeiro@suaempresa.com.br</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Before going live for customers, send <strong>one real invoice to yourself</strong>.</p>
+<h3 id="-production-checklist">✅ Production checklist</h3>
+<ul>
+<li class='task'><input type='checkbox'> <code>notas@...</code> mailbox created</li>
+<li class='task'><input type='checkbox'> App registered <strong>without</strong> <code>Mail.Send</code> under API permissions</li>
+<li class='task'><input type='checkbox'> <strong>InScope = True</strong> for the invoice mailbox and <strong>False</strong> for other mailboxes</li>
+<li class='task'><input type='checkbox'> SPF, DKIM and DMARC all <strong>PASS</strong></li>
+<li class='task'><input type='checkbox'> <strong>Unseal key and root token stored in a password manager</strong></li>
+<li class='task'><input type='checkbox'> Decided: auto-unseal <strong>on</strong> (folder protected) or <strong>off</strong> (manual unseal)</li>
+<li class='task'><input type='checkbox'> Service Principal secret <strong>deleted from your notes</strong> (it now exists only in Vault)</li>
+<li class='task'><input type='checkbox'> <code>.env</code> with strong <code>SMTP_USERNAME</code> and <code>SMTP_PASSWORD</code></li>
+<li class='task'><input type='checkbox'> <code>docker compose ps</code>: <code>smtp2graph-vault</code> and <code>smtp2graph</code> <strong>healthy</strong></li>
+<li class='task'><input type='checkbox'> Firewall open to the internal network only, no port forwarding</li>
+<li class='task'><input type='checkbox'> NTFS permissions on <code>D:\SMTP2Graph</code> restricted to Administrators</li>
+<li class='task'><input type='checkbox'> Vault volume backed up (see Maintenance)</li>
+<li class='task'><input type='checkbox'> Reminder set to <strong>rotate the secret</strong> before it expires</li>
+<li class='task'><input type='checkbox'> Machine always on, with Docker starting automatically</li>
+</ul>
+<h2 id="day-to-day-maintenance">Day-to-day maintenance</h2>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Command (in <code>D:\SMTP2Graph</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Check status</td>
+<td><code>docker compose ps</code></td>
+</tr>
+<tr>
+<td>Latest sends</td>
+<td><code>docker compose logs --tail 50 smtp2graph</code></td>
+</tr>
+<tr>
+<td>Follow live</td>
+<td><code>docker compose logs -f smtp2graph</code></td>
+</tr>
+<tr>
+<td>Find an e-mail (Windows)</td>
+<td><code>docker compose logs smtp2graph | Select-String "customer@company.com"</code></td>
+</tr>
+<tr>
+<td>Find an e-mail (Linux)</td>
+<td><code>docker compose logs smtp2graph | grep "customer@company.com"</code></td>
+</tr>
+<tr>
+<td>Restart the bridge</td>
+<td><code>docker compose restart smtp2graph</code></td>
+</tr>
+<tr>
+<td>Apply <code>.env</code> changes</td>
+<td><code>docker compose up -d</code></td>
+</tr>
+<tr>
+<td>Stop everything</td>
+<td><code>docker compose down</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>🛑 <strong>NEVER run <code>docker compose down -v</code>.</strong> The <code>-v</code> flag <strong>deletes the Vault volume</strong>, with every secret in it.</p>
+</blockquote>
+<h3 id="-rotate-the-service-principal-secret-before-it-expires">🔑 Rotate the Service Principal secret (before it expires)</h3>
+<ol>
+<li>Entra ID → your app → <strong>Certificates &amp; secrets → + New client secret</strong> → copy the <strong>Value</strong>.</li>
+<li>Run <code>.\2-configurar-vault.ps1</code> (Linux: <code>sudo bash scripts/2-configurar-vault.sh</code>) → <strong>option 1</strong> → enter the <strong>root token</strong> and the new data.</li>
+<li>The bridge picks up the new secret <strong>by itself within 5 minutes</strong>. To apply it now: <code>docker compose restart smtp2graph</code>.</li>
+<li>Check for <code>Login na Microsoft (OAuth) OK</code> in the log, and only then delete the old secret in Entra ID.</li>
+</ol>
+<h3 id="-unseal-vault-after-a-restart-if-auto-unseal-is-off">🔓 Unseal Vault after a restart (if auto-unseal is off)</h3>
+<p><code>.\2-configurar-vault.ps1</code> (Linux: <code>sudo bash scripts/2-configurar-vault.sh</code>) → <strong>option 2</strong> → paste the <strong>unseal key</strong>. The bridge recovers by itself within 15 seconds.</p>
+<h3 id="-rotate-the-bridges-vault-login-approle">🔁 Rotate the bridge's Vault login (AppRole)</h3>
+<p><code>.\2-configurar-vault.ps1</code> (Linux: <code>sudo bash scripts/2-configurar-vault.sh</code>) → <strong>option 3</strong>. The old <code>secret_id</code> is destroyed. Then run <code>docker compose restart smtp2graph</code>.</p>
+<h3 id="-vault-web-ui">🖥️ Vault web UI</h3>
+<p>Open <strong>http://127.0.0.1:8210/ui</strong> (on a Linux server, create an SSH tunnel first: <code>ssh -L 8210:127.0.0.1:8210 user@server</code>), choose <strong>Token</strong> and sign in with the root token. The secret is under <strong>secret → smtp2graph → entra</strong>. The UI only opens from this machine.</p>
+<h3 id="-vault-backup">💾 Vault backup</h3>
+<p>🪟 <strong>Windows:</strong></p>
+<pre><code class="language-powershell">cd D:\SMTP2Graph
+docker compose stop vault
+docker run --rm -v smtp2graph-vault-data:/data -v ${PWD}\backup:/backup alpine tar czf /backup/vault-data.tgz -C /data .
+docker compose start vault
+</code></pre>
+<p>🐧 <strong>Linux:</strong></p>
+<pre><code class="language-bash">cd /opt/smtp2graph
+docker compose stop vault
+docker run --rm -v smtp2graph-vault-data:/data -v &quot;$PWD/backup:/backup&quot; alpine tar czf /backup/vault-data.tgz -C /data .
+docker compose start vault
+</code></pre>
+<p>If auto-unseal is off, unseal Vault afterwards (option 2). Keep the backup somewhere safe. Remember that <strong>the backup alone opens nothing</strong>: you also need the unseal key.</p>
+<h2 id="important-limits">Important limits</h2>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Limit</th>
+<th>Value</th>
+<th>If exceeded</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Recipients per day (per mailbox)</td>
+<td><strong>10,000</strong></td>
+<td>Exchange blocks the mailbox for 24h</td>
+</tr>
+<tr>
+<td>Messages per minute (per mailbox)</td>
+<td><strong>30</strong></td>
+<td>The bridge holds and waits automatically</td>
+</tr>
+<tr>
+<td>E-mail size with attachments</td>
+<td><strong>~2.9 MB</strong></td>
+<td>Error <code>552</code> (an invoice is usually under 300 KB)</td>
+</tr>
+<tr>
+<td>Recipients per e-mail</td>
+<td><strong>100</strong> (configurable)</td>
+<td>Error <code>452</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p>First step, <strong>always</strong>: <code>docker compose logs --tail 50 smtp2graph</code>.</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Error</th>
+<th>Cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Aguardando o Vault: o Vault está SELADO</code></td>
+<td>Vault restarted and is sealed</td>
+<td>Script → option 2, or enable auto-unseal</td>
+</tr>
+<tr>
+<td><code>Aguardando o Vault: arquivos do AppRole ... não encontrados</code></td>
+<td>Vault not configured yet</td>
+<td>Run <code>.\2-configurar-vault.ps1</code> (Step 8)</td>
+</tr>
+<tr>
+<td><code>Aguardando o Vault: segredo ... não encontrado</code></td>
+<td>Service Principal not stored</td>
+<td>Script → option 1</td>
+</tr>
+<tr>
+<td><code>o Vault recusou o login do AppRole</code></td>
+<td>Invalid <code>role_id</code>/<code>secret_id</code></td>
+<td>Script → option 3, then <code>docker compose restart smtp2graph</code></td>
+</tr>
+<tr>
+<td><code>não consegui conectar no Vault</code></td>
+<td>Vault container stopped</td>
+<td><code>docker compose up -d</code></td>
+</tr>
+<tr>
+<td>Script: <code>Cannot reach Vault</code></td>
+<td>Vault is not running</td>
+<td><code>docker compose up -d</code> and <code>docker compose ps</code></td>
+</tr>
+<tr>
+<td>First run of <code>2-configurar-vault.ps1</code> shows the <strong>menu</strong> or asks for an unseal key you never received</td>
+<td>The script is talking to <strong>another Vault</strong> on the same port (e.g. from another project). <code>smtp2graph-vault</code> shows only <code>8200/tcp</code> in <code>docker ps</code>, without <code>127.0.0.1:8210-&gt;</code></td>
+<td><code>docker ps</code> to see who uses the port. Do not type the other Vault's key. Change the left side of <code>"127.0.0.1:8210:8200"</code> in <code>docker-compose.yml</code> to a free port, <code>docker compose up -d</code>, and run the script with <code>-VaultAddr http://127.0.0.1:&lt;port&gt;</code></td>
+</tr>
+<tr>
+<td>Script: <code>Bind for 127.0.0.1:8210 failed: port is already allocated</code></td>
+<td>Another program uses port 8210</td>
+<td>Same as above: pick a free port in <code>docker-compose.yml</code> and use <code>-VaultAddr</code></td>
+</tr>
+<tr>
+<td><code>smtp2graph-vault</code> <strong>unhealthy</strong></td>
+<td>Vault not initialized or sealed</td>
+<td>Step 8, or script option 2</td>
+</tr>
+<tr>
+<td><code>manifest for hashicorp/vault:2.2 not found</code></td>
+<td>Image tag not available</td>
+<td>In <code>docker-compose.yml</code>, change both lines to <code>hashicorp/vault:latest</code></td>
+</tr>
+<tr>
+<td>Lost the unseal key</td>
+<td>It cannot be recovered</td>
+<td><code>docker compose down</code>, <code>docker volume rm smtp2graph-vault-data</code>, <code>docker compose up -d</code> and redo Step 8</td>
+</tr>
+<tr>
+<td><code>AADSTS7000215: Invalid client secret</code></td>
+<td>The Secret ID was stored instead of the Value</td>
+<td>Script → option 1, with the <strong>Value</strong></td>
+</tr>
+<tr>
+<td><code>AADSTS7000222: ... expired</code></td>
+<td>Secret expired</td>
+<td>See "Rotate the secret" above</td>
+</tr>
+<tr>
+<td><code>AADSTS700016</code> / <code>AADSTS90002</code></td>
+<td>Wrong Client ID or Tenant ID</td>
+<td>Script → option 1</td>
+</tr>
+<tr>
+<td><code>ErrorAccessDenied</code></td>
+<td>Step 4 permission missing or not active yet</td>
+<td>Option A: check <strong>InScope = True</strong>. Option B: check <code>-Acao Verificar</code> = CONCEDIDO (B.1) and the policy (B.2). Wait up to 2 hours, then <code>docker compose restart smtp2graph</code></td>
+</tr>
+<tr>
+<td><code>ErrorAccessDenied: Access to OData is disabled: [RAOP] : Blocked by tenant configured AppOnly AccessPolicy settings</code></td>
+<td>Option B: the Application Access Policy is blocking. Either Mail.Send (B.1) was never granted, the mailbox is not in the group, or the policy is still propagating</td>
+<td>Run <code>.\1b-permissao-via-graph.ps1 -AppId ... -Acao Verificar</code>, <code>Get-ApplicationAccessPolicy</code> and <code>Get-DistributionGroupMember smtp2graph-remetentes</code>. If everything is right, wait up to 2 hours and run <code>docker compose restart smtp2graph</code></td>
+</tr>
+<tr>
+<td>Permission fixed, but the bridge still returns the same error</td>
+<td>The bridge reuses its Microsoft access token for up to ~1 hour. A token issued before the change does not carry the new permission</td>
+<td><code>docker compose restart smtp2graph</code> (forces a new sign-in)</td>
+</tr>
+<tr>
+<td><code>Test-ServicePrincipalAuthorization</code>: <code>couldn't be found</code></td>
+<td>Normal if you used <strong>Option B</strong>: this command only checks Option A (RBAC)</td>
+<td>With Option B use <code>Test-ApplicationAccessPolicy</code> and <code>-Acao Verificar</code>. Do not mix the two options</td>
+</tr>
+<tr>
+<td><code>Test-ApplicationAccessPolicy</code> = <code>Granted</code>, but sending still fails</td>
+<td>This test only checks the restriction (B.2). It also says Granted when Mail.Send was never granted (B.1) or when no policy exists</td>
+<td>Run <code>-Acao Verificar</code>: it must show <code>Mail.Send (Entra): CONCEDIDO</code></td>
+</tr>
+<tr>
+<td><code>ErrorSendAsDenied</code></td>
+<td>From differs from the allowed mailbox</td>
+<td>Sender = <code>notas@...</code></td>
+</tr>
+<tr>
+<td><code>535</code> / <code>530</code></td>
+<td>Bridge username/password wrong or missing</td>
+<td>Check the <code>.env</code> values in the application</td>
+</tr>
+<tr>
+<td><code>550 Remetente ... nao autorizado</code></td>
+<td>Sender not in <code>ALLOWED_SENDERS</code></td>
+<td>Fix the sender or <code>.env</code></td>
+</tr>
+<tr>
+<td><code>port is already allocated</code> (port 25)</td>
+<td>Another program uses port 25</td>
+<td>In the compose file, change to <code>"2525:2525"</code> and use port 2525</td>
+</tr>
+<tr>
+<td><code>running scripts is disabled on this system</code></td>
+<td>PowerShell policy</td>
+<td><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code></td>
+</tr>
+<tr>
+<td>🐧 <code>permission denied ... docker.sock</code></td>
+<td>User is not allowed to use Docker</td>
+<td>Use <code>sudo</code>, or <code>sudo usermod -aG docker $USER</code> and sign in again</td>
+</tr>
+<tr>
+<td>🐧 <code>/usr/bin/env: 'bash\r': No such file</code></td>
+<td>Script saved with Windows line endings</td>
+<td><code>sed -i 's/\r$//' scripts/*.sh</code></td>
+</tr>
+<tr>
+<td>🐧 Bridge: <code>arquivos do AppRole ... não encontrados</code>, but the files exist</td>
+<td>The bridge (uid 10001) cannot read them</td>
+<td>Run <code>sudo bash scripts/2-configurar-vault.sh</code> → option 3 (it fixes the owner)</td>
+</tr>
+<tr>
+<td>🐧 App on another machine cannot connect</td>
+<td>Firewall rule or cloud security group</td>
+<td><code>sudo iptables -L DOCKER-USER -n</code>; also allow port 25 in your cloud firewall (internal only)</td>
+</tr>
+<tr>
+<td>Option B: <code>Test-ApplicationAccessPolicy</code> = <code>Denied</code> for the invoice mailbox</td>
+<td>The mailbox is not in the group, or the policy is still propagating</td>
+<td><code>Get-DistributionGroupMember smtp2graph-remetentes</code>; wait up to 1-2 hours</td>
+</tr>
+<tr>
+<td><code>Connect-MgGraph</code>: insufficient privileges</td>
+<td>Account is not an admin</td>
+<td>Granting Microsoft Graph application permissions needs a Global Administrator or Privileged Role Administrator account</td>
+</tr>
+<tr>
+<td>E-mail lands in <strong>spam</strong></td>
+<td>Incomplete DNS</td>
+<td>Step 5</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="glossary">Glossary</h2>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Plain explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SMTP</strong></td>
+<td>The "classic" protocol for sending e-mail</td>
+</tr>
+<tr>
+<td><strong>Microsoft Graph</strong></td>
+<td>Microsoft 365's API (the door programs use)</td>
+</tr>
+<tr>
+<td><strong>OAuth / token</strong></td>
+<td>Modern sign-in: the program gets a temporary "pass" instead of using a password</td>
+</tr>
+<tr>
+<td><strong>Service Principal</strong></td>
+<td>An application's identity in Entra ID (Tenant ID + Client ID + secret)</td>
+</tr>
+<tr>
+<td><strong>HashiCorp Vault</strong></td>
+<td>A secrets vault: stores passwords and keys encrypted and controls who can read them</td>
+</tr>
+<tr>
+<td><strong>Seal / Unseal</strong></td>
+<td>Vault "locks itself" (sealed) on restart; the unseal key "unlocks" it</td>
+</tr>
+<tr>
+<td><strong>Root token</strong></td>
+<td>Vault's administrator password</td>
+</tr>
+<tr>
+<td><strong>AppRole</strong></td>
+<td>A program's login to Vault (role_id + secret_id)</td>
+</tr>
+<tr>
+<td><strong>KV v2</strong></td>
+<td>The Vault "drawer" type that stores secrets with version history</td>
+</tr>
+<tr>
+<td><strong>RBAC for Applications</strong></td>
+<td>Exchange feature that limits which mailboxes an app can use</td>
+</tr>
+<tr>
+<td><strong>SPF / DKIM / DMARC</strong></td>
+<td>DNS records that prove an e-mail is legitimate</td>
+</tr>
+<tr>
+<td><strong>Docker / container</strong></td>
+<td>A "box" with the program and everything it needs to run</td>
+</tr>
+</tbody>
+</table></div></section>
+<section data-lang="pt" lang="pt-BR"><h1 id="português">Português</h1>
+<p>Guia completo, passo a passo, para fazer uma aplicação que <strong>só tem configuração de SMTP</strong> (ERP, emissor de nota fiscal, sistema legado) enviar e-mails para <strong>clientes externos</strong> pelo <strong>Microsoft 365</strong>, usando autenticação moderna (OAuth). As credenciais do Service Principal ficam protegidas no <strong>HashiCorp Vault</strong>. Funciona no <strong>Windows</strong> (Docker Desktop) e no <strong>Linux</strong> (Docker Engine): cada passo mostra os comandos dos dois.</p>
+
+<h2 id="1-o-que-é-e-como-funciona">1. O que é e como funciona</h2>
+<p>Pense na ponte como um <strong>"tradutor"</strong>. A sua aplicação fala SMTP, a "língua antiga" do e-mail. A Microsoft prefere a API do Graph com OAuth, a "língua nova" e mais segura. A ponte fica no meio, traduzindo. E o <strong>cofre</strong> (Vault) guarda a "chave" que a ponte usa para entrar na Microsoft.</p>
+<pre><code> ┌───────────────┐ SMTP (porta 25) ┌───────────────┐   AppRole    ┌─────────────────┐
+ │ Sua aplicação │ ──────────────► │  SMTP2Graph   │ ───────────► │ HashiCorp Vault │
+ │ (ERP / NF-e)  │                 │   (Docker)    │ ◄─────────── │ Tenant/Client ID│
+ └───────────────┘                 └───────┬───────┘  credenciais │ e segredo       │
+                                           │                      └─────────────────┘
+                                           │ HTTPS + OAuth (Microsoft Graph)
+                                           ▼
+ ┌───────────────┐                 ┌───────────────┐
+ │ Cliente       │ ◄────────────── │ Microsoft 365 │
+ │ externo       │ e-mail com a NF │ notas@empresa │
+ └───────────────┘                 └───────────────┘
+</code></pre>
+<p><strong>Os três containers:</strong></p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Container</th>
+<th>Função</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>smtp2graph-vault</code></td>
+<td>O <strong>HashiCorp Vault</strong>, um cofre de segredos. Guarda o Tenant ID, o Client ID e o segredo do Service Principal, criptografados</td>
+</tr>
+<tr>
+<td><code>smtp2graph-vault-unseal</code></td>
+<td>(Opcional) Destranca o Vault sozinho quando o computador reinicia</td>
+</tr>
+<tr>
+<td><code>smtp2graph</code></td>
+<td>A <strong>ponte</strong>: recebe o SMTP da aplicação e entrega para a Microsoft pelo Graph</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>O que a ponte faz a cada e-mail:</strong></p>
+<ol>
+<li>Recebe o e-mail da aplicação por SMTP.</li>
+<li>Confere três coisas: o <strong>usuário/senha da ponte</strong>, se o <strong>remetente</strong> é a caixa liberada (ex.: <code>notas@suaempresa.com.br</code>) e se a conexão vem de uma <strong>rede permitida</strong>.</li>
+<li>Usa as credenciais do Service Principal, que <strong>leu do Vault</strong>, para pedir um <strong>token</strong> (um "passe" de ~1 hora) para a Microsoft.</li>
+<li>Entrega o e-mail <strong>inteiro, com anexos</strong>, para a Microsoft pela API do Graph.</li>
+<li>Responde para a aplicação se deu certo (<code>250</code>), se é para tentar de novo (<code>451</code>) ou se há um erro a corrigir (<code>550</code>).</li>
+</ol>
+<p><strong>Por que isso é seguro:</strong></p>
+<ul>
+<li>O <strong>segredo do Service Principal não fica em arquivo de texto</strong>. Ele fica criptografado dentro do Vault.</li>
+<li>A ponte entra no Vault com um <strong>AppRole</strong> que só tem permissão de <strong>LEITURA</strong> em um único caminho (<code>secret/smtp2graph/entra</code>).</li>
+<li>O aplicativo no Entra ID só consegue enviar <strong>pela caixa de notas</strong>, por causa do RBAC para Aplicativos (Passo 4).</li>
+<li>A aplicação <strong>não conhece nenhuma senha do Microsoft 365</strong>.</li>
+<li>O Vault <strong>só aceita conexões desta máquina</strong> (<code>127.0.0.1</code>) e da rede interna do Docker.</li>
+<li>Para <strong>trocar o segredo</strong> do Service Principal, basta atualizar no Vault. A ponte percebe sozinha em até 5 minutos, sem reiniciar.</li>
+</ul>
+<blockquote>
+<p>ℹ️ O <strong>HashiCorp Vault</strong> é um produto da HashiCorp, empresa da <strong>IBM</strong> desde 2025. Aqui usamos a edição Community, que é gratuita.</p>
+</blockquote>
+<h2 id="2-o-que-tem-nesta-pasta">2. O que tem nesta pasta</h2>
+<pre><code>D:\SMTP2Graph\
+├── README.md                ← este guia (inglês e português)
+├── GUIA.html                ← o mesmo guia, para abrir no navegador
+├── docker-compose.yml       ← liga Vault + auto-unseal + ponte (PRODUÇÃO)
+├── .env.example             ← modelo de configuração (copie para .env); NÃO tem segredos
+├── .gitignore / .gitattributes
+├── ponte\                   ← programa da ponte (Python, comentado)
+│   ├── smtp2graph.py
+│   ├── healthcheck.py
+│   ├── requirements.txt
+│   └── Dockerfile
+├── vault\
+│   ├── config\vault.hcl     ← configuração do servidor Vault
+│   ├── auto-unseal.sh       ← destranca o Vault após reinício (opcional)
+│   ├── approle\             ← recebe role_id e secret_id (login da ponte no Vault)
+│   └── unseal\              ← recebe unseal.key (só se ativar o auto-unseal)
+├── certs\                   ← (opcional) certificados para criptografar o SMTP
+├── scripts\                  ← Windows (.ps1) e Linux (.sh)
+│   ├── 1-configurar-permissao-exchange.ps1 / .sh  ← Passo 4, Opção A (RBAC, recomendada)
+│   ├── 1b-permissao-via-graph.ps1 / .sh           ← Passo 4, Opção B (Microsoft Graph)
+│   ├── 2-configurar-vault.ps1 / .sh               ← configura o Vault e grava o Service Principal (Passo 8)
+│   ├── 3-liberar-firewall-windows.ps1             ← firewall no Windows (Passo 10)
+│   └── 3-liberar-firewall-linux.sh                ← firewall no Linux (Passo 10)
+└── app-teste\               ← aplicação de TESTE, com tela de configuração SMTP
+</code></pre>
+<h2 id="3-antes-de-começar">3. Antes de começar</h2>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>O quê</th>
+<th>Para quê</th>
+<th>Como conferir</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🪟 <strong>Docker Desktop</strong> instalado e rodando</td>
+<td>Rodar Vault, ponte e app de teste</td>
+<td>PowerShell: <code>docker version</code> (precisa mostrar <em>Client</em> e <em>Server</em>)</td>
+</tr>
+<tr>
+<td>🐧 <strong>Docker Engine</strong> + <strong>plugin compose</strong>, <strong>curl</strong></td>
+<td>O mesmo, no Linux</td>
+<td><code>docker compose version</code> e <code>curl --version</code></td>
+</tr>
+<tr>
+<td>🐧 (opcional) <strong>PowerShell 7</strong> (<code>pwsh</code>)</td>
+<td>Passo 4 no Linux. Ou faça o Passo 4 em qualquer PC Windows</td>
+<td><code>pwsh --version</code></td>
+</tr>
+<tr>
+<td>🐧 (opcional) <strong>Azure CLI</strong> (<code>az</code>)</td>
+<td>Passo 4, Opção B no Linux</td>
+<td><code>az version</code></td>
+</tr>
+<tr>
+<td>Conta <strong>Administrador do Exchange</strong></td>
+<td>Criar a caixa e dar a permissão</td>
+<td>Admin do Microsoft 365 → Funções</td>
+</tr>
+<tr>
+<td>Conta <strong>Administrador de Aplicativos</strong> (ou Global)</td>
+<td>Registrar o aplicativo no Entra ID</td>
+<td>Admin do Entra → Funções</td>
+</tr>
+<tr>
+<td>Acesso ao <strong>DNS</strong> do domínio</td>
+<td>SPF, DKIM e DMARC (anti-spam)</td>
+<td>Registro.br, Cloudflare, GoDaddy...</td>
+</tr>
+<tr>
+<td><strong>IP interno</strong> desta máquina</td>
+<td>A aplicação vai apontar para ele</td>
+<td>PowerShell: <code>ipconfig</code> → "Endereço IPv4"</td>
+</tr>
+<tr>
+<td>Um <strong>cofre de senhas</strong> (Bitwarden, 1Password, KeePass...)</td>
+<td>Guardar a chave de desbloqueio e o root token do Vault</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>🪟 Windows ou 🐧 Linux?</strong> Os exemplos usam <code>D:\SMTP2Graph</code> no Windows e <code>/opt/smtp2graph</code> no Linux. Para levar a pasta de um PC Windows para um servidor Linux:</p>
+<pre><code class="language-powershell">scp -r D:\SMTP2Graph usuario@servidor:/opt/smtp2graph
+</code></pre>
+<p>No Linux, rode os scripts com <code>bash scripts/&lt;nome&gt;.sh</code>. Os que precisam de administrador pedem o <code>sudo</code> sozinhos.</p>
+<blockquote>
+<p>⚠️ <strong>Produção no Windows:</strong> o Docker Desktop só liga <strong>depois que alguém faz login no Windows</strong>. Para produção de verdade, use um <strong>servidor sempre ligado</strong>: Linux com Docker Engine, ou Windows com login automático e o Docker Desktop configurado para iniciar junto (<em>Settings → General → Start Docker Desktop when you sign in</em>).</p>
+</blockquote>
+<p><strong>Anote conforme for avançando</strong> (você vai digitar no Passo 8):</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Caixa de envio</td>
+<td><code>notas@suaempresa.com.br</code></td>
+</tr>
+<tr>
+<td>ID do diretório (Tenant ID)</td>
+<td></td>
+</tr>
+<tr>
+<td>ID do aplicativo (Client ID)</td>
+<td></td>
+</tr>
+<tr>
+<td>ID do objeto (de <em>Aplicativos empresariais</em>)</td>
+<td></td>
+</tr>
+<tr>
+<td>Valor do segredo (Client Secret)</td>
+<td></td>
+</tr>
+<tr>
+<td>Data de vencimento do segredo</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="parte-a--configurar-o-microsoft-365">Parte A — Configurar o Microsoft 365</h2>
+<h3 id="passo-1--criar-a-caixa-de-e-mail-de-envio">Passo 1 — Criar a caixa de e-mail de envio</h3>
+<p>Vamos criar uma <strong>caixa compartilhada</strong>. Ela não precisa de licença e ninguém faz login nela: ela é só o "remetente oficial" das notas.</p>
+<ol>
+<li>Acesse <strong>https://admin.exchange.microsoft.com</strong>.</li>
+<li>Vá em <strong>Destinatários → Caixas de correio → Adicionar uma caixa de correio compartilhada</strong>.</li>
+<li><strong>Nome de exibição:</strong> <code>Notas Fiscais - Sua Empresa</code>. <strong>Endereço:</strong> <code>notas@suaempresa.com.br</code>.</li>
+<li>Clique em <strong>Criar</strong>.</li>
+<li>(Recomendado) Adicione como <strong>membros</strong> as pessoas que devem ver as respostas dos clientes.</li>
+</ol>
+<h3 id="passo-2--registrar-o-aplicativo-no-entra-id">Passo 2 — Registrar o aplicativo no Entra ID</h3>
+<p>O "aplicativo" (Service Principal) é a <strong>identidade da ponte</strong> dentro da Microsoft, como se fosse um crachá.</p>
+<ol>
+<li>Acesse <strong>https://entra.microsoft.com</strong> → <strong>Identidade → Aplicativos → Registros de aplicativo → + Novo registro</strong>.</li>
+<li><strong>Nome:</strong> <code>SMTP2Graph - Envio de Notas Fiscais</code>. <strong>Tipos de conta:</strong> <em>Somente este diretório organizacional</em>. <strong>URI de redirecionamento:</strong> em branco.</li>
+<li>Clique em <strong>Registrar</strong>. Na <strong>Visão geral</strong>, anote:<ul>
+<li><strong>ID do aplicativo (cliente)</strong> → o <em>Client ID</em></li>
+<li><strong>ID do diretório (locatário)</strong> → o <em>Tenant ID</em></li>
+</ul>
+</li>
+<li>Vá em <strong>Identidade → Aplicativos → Aplicativos empresariais</strong>, abra o app e anote o <strong>ID do objeto</strong>.</li>
+</ol>
+<blockquote>
+<p>⚠️ O "ID do objeto" de <em>Registros de aplicativo</em> é <strong>diferente</strong> do de <em>Aplicativos empresariais</em>. Use o de <strong>Aplicativos empresariais</strong>.</p>
+</blockquote>
+<h3 id="passo-3--criar-o-segredo-do-aplicativo">Passo 3 — Criar o segredo do aplicativo</h3>
+<ol>
+<li>Em <strong>Registros de aplicativo</strong> → seu app → <strong>Certificados e segredos → + Novo segredo do cliente</strong>.</li>
+<li>Descrição: <code>smtp2graph-producao</code>. Validade: até 24 meses.</li>
+<li><strong>Copie IMEDIATAMENTE a coluna "Valor"</strong>, porque ela só aparece agora. Não confunda com o "ID do segredo".</li>
+</ol>
+<blockquote>
+<p>🔐 Esse valor vai para o <strong>Vault</strong> no Passo 8. Depois disso, <strong>apague a anotação</strong> do bloco de notas.</p>
+<p>📅 Coloque um lembrete na agenda <strong>30 dias antes do vencimento</strong>.</p>
+</blockquote>
+<p><strong>Permissões de API: NÃO adicione nada.</strong> Não conceda <code>Mail.Send</code> em <em>Permissões de API</em>, porque isso deixaria o app enviar e-mail <strong>como qualquer pessoa da empresa</strong>. A permissão vai ser dada no próximo passo, <strong>limitada à caixa de notas</strong>.</p>
+<h3 id="passo-4--dar-permissão-de-envio-só-para-a-caixa-de-notas">Passo 4 — Dar permissão de envio SÓ para a caixa de notas</h3>
+<p>O aplicativo precisa de permissão para <strong>enviar e-mail</strong>, mas só <strong>como a caixa de notas</strong>. Há dois jeitos de fazer isso. <strong>Escolha UM.</strong></p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th></th>
+<th>Opção A — RBAC para Aplicativos</th>
+<th>Opção B — Comandos do Microsoft Graph</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Onde a permissão fica</td>
+<td>Exchange Online</td>
+<td>Entra ID (Microsoft Graph)</td>
+</tr>
+<tr>
+<td>Alcance padrão</td>
+<td><strong>Só</strong> a caixa de notas</td>
+<td><strong>TODAS</strong> as caixas da empresa</td>
+</tr>
+<tr>
+<td>Como restringe</td>
+<td>Já vem restrito (escopo de gerenciamento)</td>
+<td>Application Access Policy (legado)</td>
+</tr>
+<tr>
+<td>Recomendação da Microsoft</td>
+<td>✅ Recomendada</td>
+<td>⚠️ A Microsoft pede para não criar novas Application Access Policies</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>🛑 <strong>Não misture as duas.</strong> Se o Mail.Send for concedido no Entra ID (Opção B), ele vale para a empresa toda, e o escopo do Exchange da Opção A <strong>deixa de limitar</strong>. Vai usar a Opção A? Garanta que o Mail.Send <strong>não</strong> esteja concedido no Entra ID, com a verificação no fim deste passo.</p>
+<p>ℹ️ Este passo <strong>não</strong> precisa rodar no servidor do Docker. Pode ser feito de qualquer PC de administrador.</p>
+</blockquote>
+<h4 id="opção-a--rbac-para-aplicativos-recomendada">Opção A — RBAC para Aplicativos (recomendada)</h4>
+<p>🪟 <strong>Windows (PowerShell):</strong></p>
+<pre><code class="language-powershell">cd D:\SMTP2Graph\scripts
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\1-configurar-permissao-exchange.ps1 `
+    -AppId    &quot;ID-DO-APLICATIVO&quot; `
+    -ObjectId &quot;ID-DO-OBJETO-DE-APLICATIVOS-EMPRESARIAIS&quot; `
+    -Caixa    &quot;notas@suaempresa.com.br&quot;
+</code></pre>
+<p>🐧 <strong>Linux (bash + PowerShell 7):</strong></p>
+<pre><code class="language-bash">cd /opt/smtp2graph
+bash scripts/1-configurar-permissao-exchange.sh \
+    -AppId    &quot;ID-DO-APLICATIVO&quot; \
+    -ObjectId &quot;ID-DO-OBJETO-DE-APLICATIVOS-EMPRESARIAIS&quot; \
+    -Caixa    &quot;notas@suaempresa.com.br&quot;
+</code></pre>
+<p>No Linux, o login é por <strong>código</strong>: abra o link mostrado em qualquer computador e digite o código. Se o <code>pwsh</code> não estiver instalado, o script mostra como instalar.</p>
+<p>Faça login com a conta de <strong>Administrador do Exchange</strong>. Resultado esperado no final: <strong>InScope = True</strong>.</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Comando que o script roda</th>
+<th>Em português</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>New-ServicePrincipal</code></td>
+<td>"Exchange, este é o aplicativo SMTP2Graph."</td>
+</tr>
+<tr>
+<td><code>New-ManagementScope</code></td>
+<td>"Crie um grupo que contém <strong>só</strong> a caixa <code>notas@...</code>."</td>
+</tr>
+<tr>
+<td><code>New-ManagementRoleAssignment</code></td>
+<td>"Dê ao app a permissão de <strong>enviar e-mail</strong>, só dentro desse grupo."</td>
+</tr>
+<tr>
+<td><code>Test-ServicePrincipalAuthorization</code></td>
+<td>"Confira se ficou certo."</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="opção-b--comandos-do-microsoft-graph">Opção B — Comandos do Microsoft Graph</h4>
+<p>Aqui a permissão é dada direto no aplicativo, no Entra ID, com comandos do Microsoft Graph. Tecnicamente, isso cria uma <strong>atribuição de função de aplicativo</strong> (<em>app role assignment</em>) da permissão <code>Mail.Send</code>, do tipo <em>Aplicativo</em>, do Service Principal "Microsoft Graph" para o seu app. É o mesmo que clicar em <strong>Permissões de API → Adicionar → Mail.Send → Conceder consentimento do administrador</strong> no portal, só que por comando.</p>
+<p><strong>B.1 — Conceder o Mail.Send</strong></p>
+<p>🪟 <strong>Windows — Microsoft Graph PowerShell:</strong></p>
+<pre><code class="language-powershell">Install-Module Microsoft.Graph.Applications -Scope CurrentUser
+# Login com conta de Administrador Global ou Administrador de Funções Privilegiadas
+Connect-MgGraph -Scopes &quot;Application.Read.All&quot;,&quot;AppRoleAssignment.ReadWrite.All&quot;
+
+# Service Principal do &quot;Microsoft Graph&quot; (o appId é o mesmo em todos os tenants)
+$graphSp  = Get-MgServicePrincipal -Filter &quot;appId eq '00000003-0000-0000-c000-000000000000'&quot;
+# A permissão Mail.Send do tipo Aplicativo
+$mailSend = $graphSp.AppRoles | Where-Object { $_.Value -eq &quot;Mail.Send&quot; -and $_.AllowedMemberTypes -contains &quot;Application&quot; }
+# O Service Principal do SEU app
+$appSp    = Get-MgServicePrincipal -Filter &quot;appId eq 'ID-DO-APLICATIVO'&quot;
+
+New-MgServicePrincipalAppRoleAssignment -ServicePrincipalId $appSp.Id `
+    -PrincipalId $appSp.Id -ResourceId $graphSp.Id -AppRoleId $mailSend.Id
+</code></pre>
+<p>🐧 <strong>Linux — Azure CLI chamando a API do Graph:</strong></p>
+<pre><code class="language-bash">az login --use-device-code --allow-no-subscriptions
+
+GRAPH_SP=$(az ad sp show --id 00000003-0000-0000-c000-000000000000 --query id -o tsv)
+MAIL_SEND=$(az ad sp show --id 00000003-0000-0000-c000-000000000000 \
+  --query &quot;appRoles[?value=='Mail.Send' &amp;&amp; contains(allowedMemberTypes,'Application')].id | [0]&quot; -o tsv)
+APP_SP=$(az ad sp show --id ID-DO-APLICATIVO --query id -o tsv)
+
+az rest --method POST \
+  --uri &quot;https://graph.microsoft.com/v1.0/servicePrincipals/$APP_SP/appRoleAssignments&quot; \
+  --headers &quot;Content-Type=application/json&quot; \
+  --body &quot;{\&quot;principalId\&quot;:\&quot;$APP_SP\&quot;,\&quot;resourceId\&quot;:\&quot;$GRAPH_SP\&quot;,\&quot;appRoleId\&quot;:\&quot;$MAIL_SEND\&quot;}&quot;
+</code></pre>
+<blockquote>
+<p>⚠️ Depois do B.1, o app consegue enviar como <strong>qualquer pessoa da empresa</strong>. Faça o B.2 em seguida.</p>
+</blockquote>
+<p><strong>B.2 — Restringir à caixa de notas (Application Access Policy)</strong></p>
+<p>Estes comandos (<code>New-DistributionGroup</code>, <code>New-ApplicationAccessPolicy</code>, <code>Test-ApplicationAccessPolicy</code>) <strong>não</strong> são do Microsoft Graph. Eles são do <strong>PowerShell do Exchange Online</strong>. O login do <code>Connect-MgGraph</code> feito no B.1 <strong>não</strong> serve para eles: é preciso um <strong>login separado no Exchange Online</strong>.</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>O quê</th>
+<th>Detalhe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Módulo</td>
+<td><code>ExchangeOnlineManagement</code> (instala uma vez)</td>
+</tr>
+<tr>
+<td>Comando de login</td>
+<td><code>Connect-ExchangeOnline</code></td>
+</tr>
+<tr>
+<td>Conta</td>
+<td>Um usuário do Microsoft 365 com a função <strong>Administrador do Exchange</strong> (ou Administrador Global)</td>
+</tr>
+<tr>
+<td>Windows</td>
+<td>Roda no PowerShell 5.1 ou 7. Abre uma janela de login da Microsoft</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td>Roda no <code>pwsh</code> com <code>-Device</code>: abra o link em qualquer computador e digite o código</td>
+</tr>
+</tbody>
+</table></div>
+<pre><code class="language-powershell"># 1) Instalar o módulo (só na primeira vez)
+Install-Module ExchangeOnlineManagement -Scope CurrentUser
+
+# 2) Fazer login no Exchange Online com a conta de Administrador do Exchange
+Connect-ExchangeOnline -UserPrincipalName admin@suaempresa.com.br
+#    Linux (pwsh): Connect-ExchangeOnline -UserPrincipalName admin@suaempresa.com.br -Device
+
+# Grupo de segurança habilitado para e-mail, só com a caixa de notas
+New-DistributionGroup -Name &quot;SMTP2Graph - Remetentes&quot; -Alias smtp2graph-remetentes `
+    -Type Security -Members notas@suaempresa.com.br
+
+# O app só alcança os membros desse grupo
+New-ApplicationAccessPolicy -AppId ID-DO-APLICATIVO `
+    -PolicyScopeGroupId smtp2graph-remetentes@suaempresa.com.br `
+    -AccessRight RestrictAccess -Description &quot;SMTP2Graph: somente a caixa de notas&quot;
+
+# Teste: Granted para a caixa de notas, Denied para qualquer outra
+Test-ApplicationAccessPolicy -Identity notas@suaempresa.com.br -AppId ID-DO-APLICATIVO
+Test-ApplicationAccessPolicy -Identity seu.nome@suaempresa.com.br -AppId ID-DO-APLICATIVO
+</code></pre>
+<p><strong>Scripts prontos da Opção B</strong> (fazem o B.1 e o B.2, pedindo confirmação):</p>
+<pre><code class="language-powershell"># Windows
+.\1b-permissao-via-graph.ps1 -AppId &quot;ID-DO-APLICATIVO&quot; -Acao Conceder -Caixa &quot;notas@suaempresa.com.br&quot;
+</code></pre>
+<pre><code class="language-bash"># Linux
+bash scripts/1b-permissao-via-graph.sh conceder   ID-DO-APLICATIVO
+bash scripts/1b-permissao-via-graph.sh restringir ID-DO-APLICATIVO notas@suaempresa.com.br
+</code></pre>
+<h4 id="verificar-com-o-microsoft-graph-recomendado-nas-duas-opções">Verificar com o Microsoft Graph (recomendado nas duas opções)</h4>
+<p>Mostra se o app tem Mail.Send concedido no Entra ID:</p>
+<pre><code class="language-powershell">.\1b-permissao-via-graph.ps1 -AppId &quot;ID-DO-APLICATIVO&quot; -Acao Verificar      # Windows
+</code></pre>
+<pre><code class="language-bash">bash scripts/1b-permissao-via-graph.sh verificar ID-DO-APLICATIVO            # Linux
+</code></pre>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Sua escolha</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Opção A (RBAC)</td>
+<td><code>Mail.Send (Entra): não concedido</code>. Se aparecer <strong>CONCEDIDO</strong>, remova com <code>-Acao Remover</code> / <code>remover</code></td>
+</tr>
+<tr>
+<td>Opção B (Graph)</td>
+<td><code>Mail.Send (Entra): CONCEDIDO</code> <strong>e</strong> <code>Test-ApplicationAccessPolicy</code> = <code>Granted</code> só para a caixa de notas</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>⏳ Nas duas opções, a permissão pode levar de <strong>30 minutos a 2 horas</strong> para começar a valer.</p>
+</blockquote>
+<blockquote>
+<p>🔄 <strong>Depois de mudar qualquer permissão deste passo, reinicie a ponte:</strong> <code>docker compose restart smtp2graph</code>. A ponte reaproveita o token de acesso da Microsoft por até cerca de 1 hora, então uma permissão dada depois do último login dela só vale depois de reiniciar. Se o erro continuar, espere a propagação e reinicie de novo.</p>
+</blockquote>
+<blockquote>
+<p>⚠️ <strong>A Opção B precisa do B.1 E do B.2.</strong> O B.2 (Application Access Policy) só <em>restringe</em>; não dá permissão nenhuma. O <code>Test-ApplicationAccessPolicy</code> diz <code>Granted</code> mesmo quando o Mail.Send nunca foi concedido, então confirme sempre com <code>-Acao Verificar</code>. E o <code>Test-ServicePrincipalAuthorization</code> só vale para a Opção A: na Opção B ele diz "couldn't be found", e isso é normal.</p>
+</blockquote>
+<h3 id="passo-5--ajustar-o-dns-para-não-cair-no-spam">Passo 5 — Ajustar o DNS (para não cair no spam)</h3>
+<p><strong>SPF</strong>: registro TXT do domínio (só pode existir um):</p>
+<pre><code>v=spf1 include:spf.protection.outlook.com -all
+</code></pre>
+<p><strong>DKIM</strong>: em <strong>https://security.microsoft.com</strong> → <strong>Email e colaboração → Políticas e regras → Políticas de ameaças → Configurações de autenticação de email → DKIM</strong>. Crie no DNS os dois CNAME que a tela mostrar (<code>selector1._domainkey</code> e <code>selector2._domainkey</code>) e depois ative a assinatura.</p>
+<p><strong>DMARC</strong>: registro TXT com nome <code>_dmarc</code>:</p>
+<pre><code>v=DMARC1; p=none; rua=mailto:dmarc@suaempresa.com.br
+</code></pre>
+<p>Depois de algumas semanas sem problemas, mude para <code>p=quarantine</code>.</p>
+<h2 id="parte-b--hashicorp-vault-e-a-ponte">Parte B — HashiCorp Vault e a ponte</h2>
+<h3 id="passo-6--preencher-o-arquivo-env-sem-segredos">Passo 6 — Preencher o arquivo .env (sem segredos!)</h3>
+<p>🪟 <strong>Windows:</strong></p>
+<pre><code class="language-powershell">cd D:\SMTP2Graph
+Copy-Item .env.example .env
+notepad .env
+</code></pre>
+<p>🐧 <strong>Linux:</strong></p>
+<pre><code class="language-bash">cd /opt/smtp2graph
+cp .env.example .env
+chmod 600 .env
+nano .env
+</code></pre>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Variável</th>
+<th>O que colocar</th>
+<th>Exemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ALLOWED_SENDERS</code></td>
+<td>A caixa de notas (várias: separe por vírgula)</td>
+<td><code>notas@suaempresa.com.br</code></td>
+</tr>
+<tr>
+<td><code>SMTP_USERNAME</code></td>
+<td>Um usuário <strong>que você inventa</strong> para a aplicação</td>
+<td><code>app-notas</code></td>
+</tr>
+<tr>
+<td><code>SMTP_PASSWORD</code></td>
+<td>Uma senha <strong>que você inventa</strong> (12+ caracteres)</td>
+<td><code>Gere-Uma-Senha-Sua-2026</code></td>
+</tr>
+<tr>
+<td><code>VAULT_ADDR</code></td>
+<td>Endereço do Vault (não mude)</td>
+<td><code>http://vault:8200</code></td>
+</tr>
+<tr>
+<td><code>VAULT_REFRESH_SECONDS</code></td>
+<td>De quanto em quanto tempo a ponte relê o Vault</td>
+<td><code>300</code> (5 min)</td>
+</tr>
+<tr>
+<td><code>ALLOWED_NETWORKS</code></td>
+<td>Faixas de IP permitidas</td>
+<td>deixe como está</td>
+</tr>
+<tr>
+<td><code>LOG_LEVEL</code></td>
+<td><code>INFO</code> normal, <code>DEBUG</code> para investigar</td>
+<td><code>INFO</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>🔐 O <strong>Tenant ID, o Client ID e o segredo NÃO vão no <code>.env</code></strong>: eles vão para o Vault no Passo 8.</p>
+<p>🔐 O <code>SMTP_USERNAME</code> e o <code>SMTP_PASSWORD</code> <strong>não são do Microsoft 365</strong>. São uma "senha de portaria" entre a aplicação e a ponte.</p>
+</blockquote>
+<h3 id="passo-7--ligar-os-containers">Passo 7 — Ligar os containers</h3>
+<pre><code class="language-powershell">cd D:\SMTP2Graph            # Linux: cd /opt/smtp2graph
+docker compose up -d --build
+docker compose ps
+</code></pre>
+<p>No Linux, se aparecer <code>permission denied ... docker.sock</code>, coloque <code>sudo</code> antes dos comandos <code>docker</code> (ou adicione seu usuário ao grupo <code>docker</code>).</p>
+<p>Nesse momento é <strong>normal</strong> ver:</p>
+<ul>
+<li><code>smtp2graph-vault</code> como <strong>unhealthy</strong>: o Vault ainda não foi inicializado. Ele fica <em>healthy</em> depois do Passo 8.</li>
+<li>A ponte esperando o Vault. Veja com <code>docker compose logs smtp2graph</code>:</li>
+</ul>
+<pre><code>INFO    Credenciais do Service Principal: HashiCorp Vault (http://vault:8200)
+WARNING Aguardando o Vault: o Vault está SELADO (sealed)... Nova tentativa em 15s.
+</code></pre>
+<h3 id="passo-8--configurar-o-vault-e-guardar-o-service-principal">Passo 8 — Configurar o Vault e guardar o Service Principal</h3>
+<p>Este é o passo principal. O script faz tudo e <strong>pede os dados do Service Principal</strong>.</p>
+<p>🪟 <strong>Windows:</strong></p>
+<pre><code class="language-powershell">cd D:\SMTP2Graph\scripts
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\2-configurar-vault.ps1
+</code></pre>
+<p>🐧 <strong>Linux:</strong></p>
+<pre><code class="language-bash">cd /opt/smtp2graph
+sudo bash scripts/2-configurar-vault.sh
+</code></pre>
+<p>As duas versões fazem as mesmas perguntas e têm o mesmo menu. A versão Linux usa o Vault CLI <strong>de dentro</strong> do container, então o servidor só precisa de Docker e curl. Ela também ajusta o dono dos arquivos de <code>vault/approle</code> para a ponte conseguir ler.</p>
+<p><strong>O que vai acontecer, na ordem:</strong></p>
+<ol>
+<li>
+<p><strong>Inicialização do Vault.</strong> O script mostra <strong>dois valores que aparecem UMA ÚNICA VEZ</strong>:</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Valor</th>
+<th>Para que serve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unseal key</strong> (chave de desbloqueio)</td>
+<td>Destranca o Vault depois de cada reinício. <strong>Sem ela, os dados do Vault nunca mais podem ser recuperados</strong></td>
+</tr>
+<tr>
+<td><strong>Root token</strong></td>
+<td>A "senha de administrador" do Vault. Você vai usar para atualizar o segredo no futuro</td>
+</tr>
+</tbody>
+</table></div>
+<p>👉 <strong>Guarde os dois no seu cofre de senhas</strong> e digite <code>OK</code>. A tela é limpa em seguida.</p>
+</li>
+<li>
+<p><strong>Configuração automática:</strong> o script cria o cofre <code>secret/</code>, a política somente leitura <code>smtp2graph-read</code> e o AppRole da ponte, e salva <code>role_id</code> e <code>secret_id</code> em <code>vault\approle\</code>.</p>
+</li>
+<li>
+<p><strong>Auto-unseal:</strong> o script pergunta se você quer que o Vault <strong>destranque sozinho</strong> depois de reiniciar.</p>
+<ul>
+<li><strong>Sim (recomendado para servidor sem operador):</strong> a chave é salva em <code>vault\unseal\unseal.key</code> (no Linux, com <code>chmod 600</code>).</li>
+<li><strong>Não (mais seguro):</strong> depois de cada reinício, você roda o script e escolhe a <strong>opção 2</strong> para desbloquear.</li>
+</ul>
+</li>
+<li>
+<p><strong>Dados do Service Principal:</strong> o script pede:</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Pergunta</th>
+<th>O que digitar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Tenant ID</code></td>
+<td>ID do diretório (Passo 2)</td>
+</tr>
+<tr>
+<td><code>Client ID</code></td>
+<td>ID do aplicativo (Passo 2)</td>
+</tr>
+<tr>
+<td><code>Client Secret VALUE</code></td>
+<td><strong>Valor</strong> do segredo (Passo 3). A digitação fica <strong>oculta</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Antes de gravar, o script <strong>testa o login na Microsoft</strong>. Se aparecer <strong>[OK] Login realizado com sucesso</strong>, as credenciais são guardadas no Vault em <code>secret/smtp2graph/entra</code>.</p>
+</li>
+</ol>
+<blockquote>
+<p>⚖️ <strong>Sobre o auto-unseal:</strong> ele é prático, mas quem conseguir ler a pasta <code>vault\unseal\</code> <strong>e</strong> o volume do Docker consegue abrir o cofre. Proteja a pasta <code>D:\SMTP2Graph</code> (Propriedades → Segurança: só Administradores). No Linux: <code>sudo chown -R root:root /opt/smtp2graph/vault/unseal &amp;&amp; sudo chmod 700 /opt/smtp2graph/vault/unseal</code>. Para segurança máxima, deixe desligado e desbloqueie manualmente. Uma alternativa avançada é o auto-unseal pelo Azure Key Vault (<code>seal "azurekeyvault"</code> no <code>vault.hcl</code>).</p>
+</blockquote>
+<h3 id="passo-9--conferir-se-a-ponte-ligou">Passo 9 — Conferir se a ponte ligou</h3>
+<pre><code class="language-powershell">docker compose ps
+docker compose logs --tail 20 smtp2graph
+</code></pre>
+<p>Os três containers devem estar <strong>Up</strong>, com o <code>smtp2graph-vault</code> e o <code>smtp2graph</code> <strong>healthy</strong>. O que você <strong>quer ver</strong> no log:</p>
+<pre><code>INFO    Credenciais do Service Principal: HashiCorp Vault (http://vault:8200)
+INFO    Login na Microsoft (OAuth) OK para o app e5f6a7b8-...
+INFO    Ouvindo SMTP em 0.0.0.0:2525
+INFO    Autenticação SMTP: LIGADA | TLS (STARTTLS): desligado
+</code></pre>
+<p>E a porta 25 respondendo:</p>
+<pre><code class="language-powershell">Test-NetConnection -ComputerName localhost -Port 25      # Windows → TcpTestSucceeded : True
+</code></pre>
+<pre><code class="language-bash">nc -zv 127.0.0.1 25                                       # Linux   → succeeded / open
+</code></pre>
+<h3 id="passo-10--firewall-só-se-a-aplicação-estiver-em-outra-máquina">Passo 10 — Firewall (só se a aplicação estiver em OUTRA máquina)</h3>
+<p>🪟 <strong>Windows</strong> — abra o PowerShell <strong>como Administrador</strong>:</p>
+<pre><code class="language-powershell">cd D:\SMTP2Graph\scripts
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\3-liberar-firewall-windows.ps1 -RedeOrigem &quot;192.168.0.0/24&quot;
+</code></pre>
+<p>🐧 <strong>Linux:</strong></p>
+<pre><code class="language-bash">cd /opt/smtp2graph
+sudo bash scripts/3-liberar-firewall-linux.sh 192.168.0.0/24,172.16.0.0/12 --persistir
+</code></pre>
+<ul>
+<li><code>192.168.0.0/24</code> = a sua rede (ou só o IP da aplicação). Separe várias por vírgula.</li>
+<li><code>172.16.0.0/12</code> = as redes internas do Docker. Inclua se for usar o app de teste, ou uma aplicação em Docker no mesmo servidor.</li>
+<li><code>--persistir</code> = reaplica a regra depois de reiniciar (cria o serviço <code>smtp2graph-firewall</code> no systemd).</li>
+<li>Para desfazer: <code>sudo bash scripts/3-liberar-firewall-linux.sh --remover</code></li>
+</ul>
+<blockquote>
+<p>⚠️ <strong>Linux: o <code>ufw</code> e o <code>firewalld</code> NÃO protegem portas publicadas pelo Docker.</strong> O Docker grava as regras de iptables dele antes. Por isso o script usa a cadeia própria do Docker para isso (<code>DOCKER-USER</code>).</p>
+<p>🚫 <strong>Nunca</strong> faça "port forward" da porta 25 no roteador. A ponte é só para uso <strong>interno</strong>.</p>
+<p>ℹ️ No <strong>Docker Desktop (Windows)</strong>, a ponte "enxerga" todas as conexões como vindas do próprio Docker, então o <code>ALLOWED_NETWORKS</code> do <code>.env</code> não consegue filtrar pelo IP real. No <strong>Linux</strong>, a ponte vê o IP real, e o <code>ALLOWED_NETWORKS</code> funciona como mais uma camada.</p>
+</blockquote>
+<h2 id="parte-c--testar-com-a-aplicação-de-teste">Parte C — Testar com a aplicação de teste</h2>
+<h3 id="passo-11--ligar-o-app-de-teste-e-enviar">Passo 11 — Ligar o app de teste e enviar</h3>
+<pre><code class="language-powershell">cd D:\SMTP2Graph\app-teste      # Linux: cd /opt/smtp2graph/app-teste
+docker compose up -d --build
+</code></pre>
+<p>Abra <strong>http://localhost:8080</strong> (num servidor Linux sem navegador, use <strong>http://IP-DO-SERVIDOR:8080</strong> a partir do seu PC) e preencha:</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Servidor SMTP</td>
+<td><code>host.docker.internal</code> (já vem preenchido; significa "este computador")</td>
+</tr>
+<tr>
+<td>Porta</td>
+<td><code>25</code></td>
+</tr>
+<tr>
+<td>Usuário / Senha SMTP</td>
+<td>o <code>SMTP_USERNAME</code> e o <code>SMTP_PASSWORD</code> do <code>.env</code></td>
+</tr>
+<tr>
+<td>Segurança</td>
+<td><code>Nenhuma (rede interna)</code></td>
+</tr>
+<tr>
+<td>Remetente</td>
+<td><code>notas@suaempresa.com.br</code></td>
+</tr>
+<tr>
+<td>Destino</td>
+<td><strong>um e-mail seu de fora da empresa</strong> (Gmail, Hotmail...)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Dois botões extras ajudam antes de enviar:</p>
+<ul>
+<li><strong>Testar comunicação</strong>: conecta na ponte, faz a segurança e o login e pergunta se o remetente é aceito, <strong>sem enviar e-mail nenhum</strong>. Ele <strong>não</strong> confere a permissão no Microsoft 365 (Passo 4); isso só aparece ao enviar.</li>
+<li><strong>Salvar configurações</strong>: deixa os campos preenchidos da próxima vez que você abrir a página (fica no volume Docker <code>smtp2graph-app-teste-dados</code>). A senha só é salva se você marcar <strong>Salvar também a senha</strong>; nesse caso ela fica gravada em texto dentro do container.</li>
+</ul>
+<p>Clique em <strong>Enviar nota fiscal de teste</strong>. <strong>Esperado:</strong> uma faixa verde e o e-mail chegando com <code>DANFE_000123.pdf</code> e <code>NFe_000123.xml</code>.</p>
+<p>No Gmail, vá em <strong>⋮ → Mostrar original</strong> e confira se aparecem <strong>SPF: PASS</strong>, <strong>DKIM: PASS</strong> e <strong>DMARC: PASS</strong>.</p>
+<p><strong>Testes de segurança (recomendado):</strong></p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Teste</th>
+<th>Resultado esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Senha errada</td>
+<td>❌ <code>535 Authentication credentials invalid</code></td>
+</tr>
+<tr>
+<td>Sem usuário</td>
+<td>❌ <code>530 Authentication required</code></td>
+</tr>
+<tr>
+<td>Remetente <code>diretor@suaempresa.com.br</code></td>
+<td>❌ <code>550 ... nao autorizado nesta ponte</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Desligue o app de teste quando terminar: <code>docker compose down</code>, dentro da pasta <code>app-teste</code>.</p>
+<h2 id="parte-d--ligar-a-aplicação-de-produção">Parte D — Ligar a aplicação de produção</h2>
+<h3 id="passo-12--configurar-a-aplicação-real">Passo 12 — Configurar a aplicação real</h3>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Campo na aplicação</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Servidor SMTP / Host</strong></td>
+<td>IP desta máquina (ex.: <code>192.168.0.50</code>), ou <code>localhost</code> se a aplicação roda aqui</td>
+</tr>
+<tr>
+<td><strong>Porta</strong></td>
+<td><code>25</code></td>
+</tr>
+<tr>
+<td><strong>Usuário / Senha</strong></td>
+<td><code>SMTP_USERNAME</code> / <code>SMTP_PASSWORD</code> do <code>.env</code></td>
+</tr>
+<tr>
+<td><strong>SSL/TLS</strong></td>
+<td>Nenhum (STARTTLS só se configurou <code>certs\</code>)</td>
+</tr>
+<tr>
+<td><strong>Remetente (From)</strong></td>
+<td><code>notas@suaempresa.com.br</code>, <strong>exatamente</strong> a caixa liberada</td>
+</tr>
+<tr>
+<td><strong>Responder para (Reply-To)</strong></td>
+<td>opcional, ex.: <code>financeiro@suaempresa.com.br</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Antes de liberar para os clientes, envie <strong>uma nota real para você mesmo</strong>.</p>
+<h3 id="-checklist-de-produção">✅ Checklist de produção</h3>
+<ul>
+<li class='task'><input type='checkbox'> Caixa <code>notas@...</code> criada</li>
+<li class='task'><input type='checkbox'> App registrado <strong>sem</strong> <code>Mail.Send</code> em Permissões de API</li>
+<li class='task'><input type='checkbox'> <strong>InScope = True</strong> para a caixa de notas e <strong>False</strong> para outras caixas</li>
+<li class='task'><input type='checkbox'> SPF, DKIM e DMARC com <strong>PASS</strong></li>
+<li class='task'><input type='checkbox'> <strong>Unseal key e root token guardados no cofre de senhas</strong></li>
+<li class='task'><input type='checkbox'> Decidido: auto-unseal <strong>ligado</strong> (pasta protegida) ou <strong>desligado</strong> (desbloqueio manual)</li>
+<li class='task'><input type='checkbox'> Segredo do Service Principal <strong>apagado do bloco de notas</strong> (agora ele só existe no Vault)</li>
+<li class='task'><input type='checkbox'> <code>.env</code> com <code>SMTP_USERNAME</code> e <code>SMTP_PASSWORD</code> fortes</li>
+<li class='task'><input type='checkbox'> <code>docker compose ps</code>: <code>smtp2graph-vault</code> e <code>smtp2graph</code> <strong>healthy</strong></li>
+<li class='task'><input type='checkbox'> Firewall liberado só para a rede interna, sem port forward</li>
+<li class='task'><input type='checkbox'> Permissões NTFS de <code>D:\SMTP2Graph</code> restritas a Administradores</li>
+<li class='task'><input type='checkbox'> Backup do volume do Vault feito (veja Manutenção)</li>
+<li class='task'><input type='checkbox'> Lembrete para <strong>renovar o segredo</strong> antes de vencer</li>
+<li class='task'><input type='checkbox'> Máquina sempre ligada, com o Docker iniciando sozinho</li>
+</ul>
+<h2 id="manutenção-do-dia-a-dia">Manutenção do dia a dia</h2>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Tarefa</th>
+<th>Comando (em <code>D:\SMTP2Graph</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ver status</td>
+<td><code>docker compose ps</code></td>
+</tr>
+<tr>
+<td>Últimos envios</td>
+<td><code>docker compose logs --tail 50 smtp2graph</code></td>
+</tr>
+<tr>
+<td>Acompanhar ao vivo</td>
+<td><code>docker compose logs -f smtp2graph</code></td>
+</tr>
+<tr>
+<td>Procurar um e-mail (Windows)</td>
+<td><code>docker compose logs smtp2graph | Select-String "cliente@empresa.com"</code></td>
+</tr>
+<tr>
+<td>Procurar um e-mail (Linux)</td>
+<td><code>docker compose logs smtp2graph | grep "cliente@empresa.com"</code></td>
+</tr>
+<tr>
+<td>Reiniciar a ponte</td>
+<td><code>docker compose restart smtp2graph</code></td>
+</tr>
+<tr>
+<td>Aplicar mudança no <code>.env</code></td>
+<td><code>docker compose up -d</code></td>
+</tr>
+<tr>
+<td>Desligar tudo</td>
+<td><code>docker compose down</code></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>🛑 <strong>NUNCA rode <code>docker compose down -v</code>.</strong> O <code>-v</code> <strong>apaga o volume do Vault</strong>, com todos os segredos dentro.</p>
+</blockquote>
+<h3 id="-trocar-o-segredo-do-service-principal-antes-de-vencer">🔑 Trocar o segredo do Service Principal (antes de vencer)</h3>
+<ol>
+<li>Entra ID → seu app → <strong>Certificados e segredos → + Novo segredo do cliente</strong> → copie o <strong>Valor</strong>.</li>
+<li>Rode <code>.\2-configurar-vault.ps1</code> (Linux: <code>sudo bash scripts/2-configurar-vault.sh</code>) → <strong>opção 1</strong> → informe o <strong>root token</strong> e os dados novos.</li>
+<li>A ponte pega o segredo novo <strong>sozinha em até 5 minutos</strong>. Para ser imediato: <code>docker compose restart smtp2graph</code>.</li>
+<li>Confira no log <code>Login na Microsoft (OAuth) OK</code> e só então apague o segredo antigo no Entra ID.</li>
+</ol>
+<h3 id="-desbloquear-o-vault-depois-de-reiniciar-se-o-auto-unseal-estiver-desligado">🔓 Desbloquear o Vault depois de reiniciar (se o auto-unseal estiver desligado)</h3>
+<p><code>.\2-configurar-vault.ps1</code> (Linux: <code>sudo bash scripts/2-configurar-vault.sh</code>) → <strong>opção 2</strong> → cole a <strong>unseal key</strong>. A ponte volta a funcionar sozinha em até 15 segundos.</p>
+<h3 id="-trocar-o-login-da-ponte-no-vault-approle">🔁 Trocar o login da ponte no Vault (AppRole)</h3>
+<p><code>.\2-configurar-vault.ps1</code> (Linux: <code>sudo bash scripts/2-configurar-vault.sh</code>) → <strong>opção 3</strong>. O <code>secret_id</code> antigo é destruído. Depois rode <code>docker compose restart smtp2graph</code>.</p>
+<h3 id="-interface-web-do-vault">🖥️ Interface web do Vault</h3>
+<p>Abra <strong>http://127.0.0.1:8210/ui</strong> (num servidor Linux, crie antes um túnel SSH: <code>ssh -L 8210:127.0.0.1:8210 usuario@servidor</code>), escolha <strong>Token</strong> e entre com o root token. O segredo fica em <strong>secret → smtp2graph → entra</strong>. A interface só abre a partir desta máquina.</p>
+<h3 id="-backup-do-vault">💾 Backup do Vault</h3>
+<p>🪟 <strong>Windows:</strong></p>
+<pre><code class="language-powershell">cd D:\SMTP2Graph
+docker compose stop vault
+docker run --rm -v smtp2graph-vault-data:/data -v ${PWD}\backup:/backup alpine tar czf /backup/vault-data.tgz -C /data .
+docker compose start vault
+</code></pre>
+<p>🐧 <strong>Linux:</strong></p>
+<pre><code class="language-bash">cd /opt/smtp2graph
+docker compose stop vault
+docker run --rm -v smtp2graph-vault-data:/data -v &quot;$PWD/backup:/backup&quot; alpine tar czf /backup/vault-data.tgz -C /data .
+docker compose start vault
+</code></pre>
+<p>Se o auto-unseal estiver desligado, desbloqueie o Vault depois disso (opção 2). Guarde o backup em local seguro. Lembre que <strong>o backup sozinho não abre nada</strong>: é preciso ter também a unseal key.</p>
+<h2 id="limites-importantes">Limites importantes</h2>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Limite</th>
+<th>Valor</th>
+<th>Se passar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Destinatários por dia (por caixa)</td>
+<td><strong>10.000</strong></td>
+<td>O Exchange bloqueia a caixa por 24h</td>
+</tr>
+<tr>
+<td>Mensagens por minuto (por caixa)</td>
+<td><strong>30</strong></td>
+<td>A ponte segura e espera sozinha</td>
+</tr>
+<tr>
+<td>Tamanho do e-mail com anexos</td>
+<td><strong>~2,9 MB</strong></td>
+<td>Erro <code>552</code> (uma NF costuma ter menos de 300 KB)</td>
+</tr>
+<tr>
+<td>Destinatários por e-mail</td>
+<td><strong>100</strong> (configurável)</td>
+<td>Erro <code>452</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="solução-de-problemas">Solução de problemas</h2>
+<p>Primeiro passo, <strong>sempre</strong>: <code>docker compose logs --tail 50 smtp2graph</code>.</p>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Erro</th>
+<th>Causa</th>
+<th>Solução</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Aguardando o Vault: o Vault está SELADO</code></td>
+<td>O Vault reiniciou e está trancado</td>
+<td>Script → opção 2, ou ative o auto-unseal</td>
+</tr>
+<tr>
+<td><code>Aguardando o Vault: arquivos do AppRole ... não encontrados</code></td>
+<td>O Vault ainda não foi configurado</td>
+<td>Rode <code>.\2-configurar-vault.ps1</code> (Passo 8)</td>
+</tr>
+<tr>
+<td><code>Aguardando o Vault: segredo ... não encontrado</code></td>
+<td>O Service Principal não foi gravado</td>
+<td>Script → opção 1</td>
+</tr>
+<tr>
+<td><code>o Vault recusou o login do AppRole</code></td>
+<td><code>role_id</code>/<code>secret_id</code> inválidos</td>
+<td>Script → opção 3 e <code>docker compose restart smtp2graph</code></td>
+</tr>
+<tr>
+<td><code>não consegui conectar no Vault</code></td>
+<td>O container do Vault está parado</td>
+<td><code>docker compose up -d</code></td>
+</tr>
+<tr>
+<td>Script: <code>Cannot reach Vault</code></td>
+<td>O Vault está desligado</td>
+<td><code>docker compose up -d</code> e <code>docker compose ps</code></td>
+</tr>
+<tr>
+<td>A primeira execução do <code>2-configurar-vault.ps1</code> mostra o <strong>menu</strong> ou pede uma unseal key que você nunca recebeu</td>
+<td>O script está falando com <strong>outro Vault</strong> na mesma porta (ex.: de outro projeto). O <code>smtp2graph-vault</code> aparece só com <code>8200/tcp</code> no <code>docker ps</code>, sem <code>127.0.0.1:8210-&gt;</code></td>
+<td><code>docker ps</code> para ver quem usa a porta. Não digite a chave do outro Vault. Troque o lado esquerdo de <code>"127.0.0.1:8210:8200"</code> no <code>docker-compose.yml</code> por uma porta livre, <code>docker compose up -d</code>, e rode o script com <code>-VaultAddr http://127.0.0.1:&lt;porta&gt;</code></td>
+</tr>
+<tr>
+<td>Script: <code>Bind for 127.0.0.1:8210 failed: port is already allocated</code></td>
+<td>Outro programa usa a porta 8210</td>
+<td>Igual ao item acima: escolha uma porta livre no <code>docker-compose.yml</code> e use <code>-VaultAddr</code></td>
+</tr>
+<tr>
+<td><code>smtp2graph-vault</code> <strong>unhealthy</strong></td>
+<td>Vault não inicializado ou selado</td>
+<td>Passo 8, ou opção 2 do script</td>
+</tr>
+<tr>
+<td><code>manifest for hashicorp/vault:2.2 not found</code></td>
+<td>Tag da imagem indisponível</td>
+<td>No <code>docker-compose.yml</code>, troque as duas linhas para <code>hashicorp/vault:latest</code></td>
+</tr>
+<tr>
+<td>Perdi a unseal key</td>
+<td>Não há como recuperar</td>
+<td><code>docker compose down</code>, <code>docker volume rm smtp2graph-vault-data</code>, <code>docker compose up -d</code> e refaça o Passo 8</td>
+</tr>
+<tr>
+<td><code>AADSTS7000215: Invalid client secret</code></td>
+<td>Gravou o ID do segredo em vez do Valor</td>
+<td>Script → opção 1, com o <strong>Valor</strong></td>
+</tr>
+<tr>
+<td><code>AADSTS7000222: ... expired</code></td>
+<td>Segredo vencido</td>
+<td>Veja "Trocar o segredo" acima</td>
+</tr>
+<tr>
+<td><code>AADSTS700016</code> / <code>AADSTS90002</code></td>
+<td>Client ID ou Tenant ID errado</td>
+<td>Script → opção 1</td>
+</tr>
+<tr>
+<td><code>ErrorAccessDenied</code></td>
+<td>Permissão do Passo 4 faltando ou ainda não vale</td>
+<td>Opção A: confira <strong>InScope = True</strong>. Opção B: confira <code>-Acao Verificar</code> = CONCEDIDO (B.1) e a política (B.2). Espere até 2 horas e rode <code>docker compose restart smtp2graph</code></td>
+</tr>
+<tr>
+<td><code>ErrorAccessDenied: Access to OData is disabled: [RAOP] : Blocked by tenant configured AppOnly AccessPolicy settings</code></td>
+<td>Opção B: a Application Access Policy está bloqueando. Ou o Mail.Send (B.1) não foi concedido, ou a caixa não está no grupo, ou a política ainda está propagando</td>
+<td>Rode <code>.\1b-permissao-via-graph.ps1 -AppId ... -Acao Verificar</code>, <code>Get-ApplicationAccessPolicy</code> e <code>Get-DistributionGroupMember smtp2graph-remetentes</code>. Se estiver tudo certo, espere até 2 horas e rode <code>docker compose restart smtp2graph</code></td>
+</tr>
+<tr>
+<td>Permissão corrigida, mas a ponte continua com o mesmo erro</td>
+<td>A ponte reaproveita o token de acesso da Microsoft por até ~1 hora. Um token emitido antes da mudança não tem a permissão nova</td>
+<td><code>docker compose restart smtp2graph</code> (força um login novo)</td>
+</tr>
+<tr>
+<td><code>Test-ServicePrincipalAuthorization</code>: <code>couldn't be found</code></td>
+<td>Normal se você usou a <strong>Opção B</strong>: esse comando só confere a Opção A (RBAC)</td>
+<td>Na Opção B use <code>Test-ApplicationAccessPolicy</code> e <code>-Acao Verificar</code>. Não misture as duas opções</td>
+</tr>
+<tr>
+<td><code>Test-ApplicationAccessPolicy</code> = <code>Granted</code>, mas o envio continua falhando</td>
+<td>Esse teste só confere a restrição (B.2). Ele também diz Granted quando o Mail.Send (B.1) nunca foi concedido ou quando não existe política</td>
+<td>Rode <code>-Acao Verificar</code>: deve mostrar <code>Mail.Send (Entra): CONCEDIDO</code></td>
+</tr>
+<tr>
+<td><code>ErrorSendAsDenied</code></td>
+<td>O From é diferente da caixa liberada</td>
+<td>Remetente = <code>notas@...</code></td>
+</tr>
+<tr>
+<td><code>535</code> / <code>530</code></td>
+<td>Usuário/senha <strong>da ponte</strong> errados ou ausentes</td>
+<td>Confira na aplicação os valores do <code>.env</code></td>
+</tr>
+<tr>
+<td><code>550 Remetente ... nao autorizado</code></td>
+<td>Remetente fora do <code>ALLOWED_SENDERS</code></td>
+<td>Corrija o remetente ou o <code>.env</code></td>
+</tr>
+<tr>
+<td><code>port is already allocated</code> (porta 25)</td>
+<td>Outro programa usa a porta 25</td>
+<td>No compose, troque para <code>"2525:2525"</code> e use a porta 2525</td>
+</tr>
+<tr>
+<td><code>execução de scripts foi desabilitada</code></td>
+<td>Política do PowerShell</td>
+<td><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code></td>
+</tr>
+<tr>
+<td>🐧 <code>permission denied ... docker.sock</code></td>
+<td>O usuário não pode usar o Docker</td>
+<td>Use <code>sudo</code>, ou <code>sudo usermod -aG docker $USER</code> e entre de novo</td>
+</tr>
+<tr>
+<td>🐧 <code>/usr/bin/env: 'bash\r': No such file</code></td>
+<td>Script salvo com quebra de linha do Windows</td>
+<td><code>sed -i 's/\r$//' scripts/*.sh</code></td>
+</tr>
+<tr>
+<td>🐧 Ponte: <code>arquivos do AppRole ... não encontrados</code>, mas os arquivos existem</td>
+<td>A ponte (uid 10001) não consegue ler</td>
+<td>Rode <code>sudo bash scripts/2-configurar-vault.sh</code> → opção 3 (ele corrige o dono)</td>
+</tr>
+<tr>
+<td>🐧 Aplicação em outra máquina não conecta</td>
+<td>Regra do firewall ou security group da nuvem</td>
+<td><code>sudo iptables -L DOCKER-USER -n</code>; libere também a porta 25 no firewall da nuvem (só rede interna)</td>
+</tr>
+<tr>
+<td>Opção B: <code>Test-ApplicationAccessPolicy</code> = <code>Denied</code> para a caixa de notas</td>
+<td>A caixa não está no grupo, ou a política ainda está propagando</td>
+<td><code>Get-DistributionGroupMember smtp2graph-remetentes</code>; espere até 1-2 horas</td>
+</tr>
+<tr>
+<td><code>Connect-MgGraph</code>: privilégios insuficientes</td>
+<td>A conta não é administradora</td>
+<td>Conceder permissões de aplicativo do Microsoft Graph exige Administrador Global ou Administrador de Funções Privilegiadas</td>
+</tr>
+<tr>
+<td>E-mail cai no <strong>spam</strong></td>
+<td>DNS incompleto</td>
+<td>Passo 5</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="glossário">Glossário</h2>
+<div class='tabela'><table>
+<thead>
+<tr>
+<th>Termo</th>
+<th>Explicação simples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SMTP</strong></td>
+<td>O protocolo "clássico" de envio de e-mail</td>
+</tr>
+<tr>
+<td><strong>Microsoft Graph</strong></td>
+<td>A API (porta de entrada para programas) do Microsoft 365</td>
+</tr>
+<tr>
+<td><strong>OAuth / token</strong></td>
+<td>Login moderno: o programa recebe um "passe" temporário em vez de usar senha</td>
+</tr>
+<tr>
+<td><strong>Service Principal</strong></td>
+<td>A identidade de um aplicativo no Entra ID (Tenant ID + Client ID + segredo)</td>
+</tr>
+<tr>
+<td><strong>HashiCorp Vault</strong></td>
+<td>Cofre de segredos: guarda senhas e chaves criptografadas e controla quem pode ler</td>
+</tr>
+<tr>
+<td><strong>Seal / Unseal</strong></td>
+<td>O Vault "se tranca" (sealed) ao reiniciar; a unseal key "destranca"</td>
+</tr>
+<tr>
+<td><strong>Root token</strong></td>
+<td>A senha de administrador do Vault</td>
+</tr>
+<tr>
+<td><strong>AppRole</strong></td>
+<td>Login de um programa no Vault (role_id + secret_id)</td>
+</tr>
+<tr>
+<td><strong>KV v2</strong></td>
+<td>O tipo de "gaveta" do Vault que guarda segredos com histórico de versões</td>
+</tr>
+<tr>
+<td><strong>RBAC para Aplicativos</strong></td>
+<td>Recurso do Exchange que limita quais caixas um aplicativo pode usar</td>
+</tr>
+<tr>
+<td><strong>SPF / DKIM / DMARC</strong></td>
+<td>Registros de DNS que provam que o e-mail é legítimo</td>
+</tr>
+<tr>
+<td><strong>Docker / container</strong></td>
+<td>Uma "caixinha" com o programa e tudo de que ele precisa para rodar</td>
+</tr>
+</tbody>
+</table></div></section>
+</main>
+<script>
+function idioma(l){
+  document.querySelectorAll('[data-lang]').forEach(function(e){e.classList.toggle('visivel',e.getAttribute('data-lang')===l)});
+  document.querySelectorAll('.idiomas button').forEach(function(b){b.classList.toggle('ativo',b.getAttribute('data-set')===l)});
+  document.documentElement.lang = l==='pt' ? 'pt-BR' : 'en';
+  try{localStorage.setItem('smtp2graph-lang',l)}catch(e){}
+  marcar();
+}
+document.querySelectorAll('.idiomas button').forEach(function(b){b.onclick=function(){idioma(b.getAttribute('data-set'));window.scrollTo(0,0)}});
+document.querySelectorAll('pre').forEach(function(pre){
+  var b=document.createElement('button'); b.className='copiar'; b.textContent='Copy';
+  b.onclick=function(){
+    var t=pre.querySelector('code')?pre.querySelector('code').innerText:pre.innerText;
+    navigator.clipboard.writeText(t).then(function(){b.textContent='✓';setTimeout(function(){b.textContent='Copy'},1500)},
+      function(){b.textContent='Ctrl+C'});
+  };
+  pre.appendChild(b);
+});
+function marcar(){
+  var nav=document.querySelector('nav.lateral div.visivel'); if(!nav) return;
+  var links=[].slice.call(nav.querySelectorAll('a')), i=0;
+  links.forEach(function(a,k){var el=document.getElementById(decodeURIComponent(a.hash.slice(1)));if(el&&el.getBoundingClientRect().top<120)i=k});
+  links.forEach(function(a,k){a.classList.toggle('ativo',k===i)});
+}
+window.addEventListener('scroll',marcar);
+document.querySelectorAll('li.task input').forEach(function(c,i){
+  try{c.checked=localStorage.getItem('smtp2graph-check-'+i)==='1'}catch(e){}
+  c.onchange=function(){try{localStorage.setItem('smtp2graph-check-'+i,c.checked?'1':'0')}catch(e){}};
+});
+var inicial='en';
+try{inicial=localStorage.getItem('smtp2graph-lang')||'en'}catch(e){}
+var alvo=decodeURIComponent(location.hash.slice(1));
+if(alvo){var el=document.getElementById(alvo);if(el){var s=el.closest('section');if(s)inicial=s.getAttribute('data-lang')}}
+idioma(inicial);
+</script>
+</body>
+</html>

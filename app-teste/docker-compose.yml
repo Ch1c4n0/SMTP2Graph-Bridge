@@ -1,0 +1,31 @@
+# ---------------------------------------------------------------
+# App de TESTE (simula um sistema que só tem configuração SMTP)
+#
+# Subir:   docker compose up -d --build
+# Abrir:   http://localhost:8080
+# Parar:   docker compose down
+# ---------------------------------------------------------------
+services:
+  app-teste:
+    build: .
+    container_name: smtp2graph-app-teste
+    ports:
+      - "8080:8080"
+    environment:
+      # "host.docker.internal" = o seu próprio computador visto de dentro do container.
+      # Assim o teste passa pela porta 25 do computador, igual a uma aplicação real.
+      SMTP_SERVIDOR: host.docker.internal
+      SMTP_PORTA: "25"
+      SMTP_USUARIO: app-notas
+      SMTP_SEGURANCA: nenhuma
+      SMTP_REMETENTE: notas@suaempresa.com.br
+      NOME_EMPRESA: Sua Empresa Ltda
+    volumes:
+      # Guarda as configurações do botão "Salvar configurações"
+      - app-teste-dados:/app/dados
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  app-teste-dados:
+    name: smtp2graph-app-teste-dados

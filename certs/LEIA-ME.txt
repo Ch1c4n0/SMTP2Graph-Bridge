@@ -1,0 +1,16 @@
+PASTA DE CERTIFICADOS (OPCIONAL)
+================================
+
+Use esta pasta só se quiser criptografar (STARTTLS) a conversa entre
+a sua aplicação e a ponte. Dentro de uma rede interna isso é opcional.
+
+Coloque aqui dois arquivos com exatamente estes nomes:
+  cert.pem  -> o certificado (pode incluir a cadeia/intermediários)
+  key.pem   -> a chave privada (sem senha)
+
+Depois reinicie a ponte:  docker compose restart
+
+Se quiser OBRIGAR a criptografia, coloque REQUIRE_TLS=true no arquivo .env.
+
+Observação: o trecho entre a ponte e a Microsoft SEMPRE é criptografado
+(HTTPS), com ou sem estes arquivos.

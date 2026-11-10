@@ -1,0 +1,80 @@
+# ---------------------------------------------------------------
+# SMTP2Graph - SMTP -> Microsoft Graph bridge + HashiCorp Vault
+#
+# Start / Subir:        docker compose up -d --build
+# Logs:                 docker compose logs -f
+# Stop / Parar:         docker compose down
+# ---------------------------------------------------------------
+services:
+
+  # -------- HashiCorp Vault: guarda as credenciais do Service Principal --------
+  vault:
+    image: hashicorp/vault:2.2
+    container_name: smtp2graph-vault
+    command: server
+    environment:
+      SKIP_SETCAP: "true"
+      VAULT_ADDR: http://127.0.0.1:8200
+    ports:
+      # Só acessível a partir DESTA máquina (script de configuração e interface web)
+      # Only reachable from THIS machine (setup script and web UI)
+      - "127.0.0.1:8210:8200"
+    volumes:
+      - ./vault/config:/vault/config:ro
+      - vault-data:/vault/file
+    restart: unless-stopped
+    healthcheck:
+      # "healthy" = Vault inicializado e desbloqueado / initialized and unsealed
+      test: ["CMD", "vault", "status"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging: &logs
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # -------- Auto-unseal (opcional): desbloqueia o Vault após reinício --------
+  vault-unseal:
+    image: hashicorp/vault:2.2
+    container_name: smtp2graph-vault-unseal
+    entrypoint: ["/bin/sh", "/scripts/auto-unseal.sh"]
+    environment:
+      VAULT_ADDR: http://vault:8200
+    volumes:
+      - ./vault/auto-unseal.sh:/scripts/auto-unseal.sh:ro
+      - ./vault/unseal:/unseal:ro
+    depends_on:
+      - vault
+    restart: unless-stopped
+    logging: *logs
+
+  # -------- Ponte SMTP -> Microsoft Graph --------
+  smtp2graph:
+    build: ./ponte
+    image: smtp2graph:1.1
+    container_name: smtp2graph
+    env_file: .env
+    ports:
+      # "PORTA_NO_COMPUTADOR:PORTA_NO_CONTAINER" / "HOST_PORT:CONTAINER_PORT"
+      - "25:2525"
+    volumes:
+      - ./certs:/certs:ro
+      - ./vault/approle:/vault-approle:ro
+    depends_on:
+      - vault
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging: *logs
+
+volumes:
+  vault-data:
+    name: smtp2graph-vault-data

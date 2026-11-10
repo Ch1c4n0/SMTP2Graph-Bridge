@@ -1,0 +1,50 @@
+# ---------------------------------------------------------------
+# NUNCA publicar segredos / NEVER publish secrets
+# ---------------------------------------------------------------
+
+# Variáveis de ambiente reais (só o .env.example vai para o Git)
+.env
+.env.*
+!.env.example
+
+# Credenciais do Vault geradas pelo scripts\2-configurar-vault
+vault/approle/*
+!vault/approle/README.txt
+vault/unseal/*
+!vault/unseal/README.txt
+*.key
+vault-keys*.txt
+vault-init*.json
+root_token*
+
+# Certificados e chaves privadas (TLS da ponte)
+certs/*
+!certs/LEIA-ME.txt
+*.pem
+*.pfx
+*.p12
+*.crt
+*.csr
+
+# Backups do Vault
+*.snap
+backup/
+
+# Dados locais do app de teste
+app-teste/dados/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editores e sistema
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
+*.log
+Thumbs.db
+.DS_Store

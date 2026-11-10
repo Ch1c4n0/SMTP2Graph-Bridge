@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App de Teste - Envio de Nota Fiscal por SMTP</title>
+<style>
+  :root { --azul:#0f6cbd; --verde:#107c41; --vermelho:#c42b1c; --borda:#d1d1d1; --fundo:#f5f5f5; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Segoe UI", system-ui, sans-serif; background:var(--fundo); color:#242424; }
+  header { background:var(--azul); color:#fff; padding:18px 28px; }
+  header h1 { margin:0; font-size:20px; font-weight:600; }
+  header p { margin:4px 0 0; opacity:.85; font-size:14px; }
+  main { max-width:920px; margin:24px auto; padding:0 16px; }
+  .card { background:#fff; border:1px solid var(--borda); border-radius:8px; padding:20px 24px; margin-bottom:20px; }
+  .card h2 { font-size:16px; margin:0 0 4px; }
+  .card .dica { font-size:13px; color:#616161; margin:0 0 16px; }
+  .grade { display:grid; grid-template-columns: 1fr 1fr; gap:14px 20px; }
+  .grade .inteiro { grid-column: 1 / -1; }
+  label { display:block; font-size:13px; font-weight:600; margin-bottom:4px; }
+  label small { font-weight:400; color:#616161; }
+  input[type=text], input[type=password], input[type=email], input[type=number], select {
+    width:100%; padding:8px 10px; border:1px solid var(--borda); border-radius:4px; font-size:14px; font-family:inherit; }
+  input:focus, select:focus { outline:2px solid var(--azul); outline-offset:-1px; }
+  .check { display:flex; gap:8px; align-items:center; font-size:13px; }
+  button { background:var(--azul); color:#fff; border:0; border-radius:4px; padding:10px 22px; font-size:15px; font-weight:600; cursor:pointer; }
+  button:hover { filter:brightness(1.1); }
+  button.secundario { background:#fff; color:var(--azul); border:1px solid var(--azul); }
+  button.secundario:hover { filter:none; background:#ebf3fc; }
+  .acoes { display:flex; flex-wrap:wrap; gap:10px 12px; align-items:center; }
+  .acoes .check { margin:0 0 0 4px; font-weight:400; }
+  .resultado { border-radius:8px; padding:14px 18px; margin-bottom:20px; font-weight:600; }
+  .resultado.ok { background:#e6f4ea; border:1px solid var(--verde); color:var(--verde); }
+  .resultado.erro { background:#fde7e9; border:1px solid var(--vermelho); color:var(--vermelho); }
+  pre { background:#1e1e1e; color:#d4d4d4; padding:14px; border-radius:6px; overflow:auto; font-size:12px; max-height:360px; white-space:pre-wrap; word-break:break-all; }
+  @media (max-width:640px) { .grade { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>📄 App de Teste — Emissor de Nota Fiscal</h1>
+  <p>Simula um sistema que só tem "Configuração de SMTP". Use para testar a ponte SMTP2Graph.</p>
+</header>
+<main>
+
+{% if r %}
+  <div class="resultado {{ 'ok' if r.ok else 'erro' }}">{{ '✅ ' if r.ok else '❌ ' }}{{ r.mensagem }}</div>
+{% endif %}
+
+<form method="post">
+  <div class="card">
+    <h2>1. Configuração do servidor SMTP</h2>
+    <p class="dica">É aqui que você "aponta" para a ponte. Use os mesmos valores depois na aplicação de produção.</p>
+    <div class="grade">
+      <div>
+        <label>Servidor SMTP <small>(IP ou nome da máquina da ponte)</small></label>
+        <input type="text" name="servidor" value="{{ d.servidor }}" required>
+      </div>
+      <div>
+        <label>Porta</label>
+        <input type="number" name="porta" value="{{ d.porta }}" required>
+      </div>
+      <div>
+        <label>Usuário SMTP <small>(o SMTP_USERNAME do .env)</small></label>
+        <input type="text" name="usuario" value="{{ d.usuario }}" autocomplete="off">
+      </div>
+      <div>
+        <label>Senha SMTP <small>(o SMTP_PASSWORD do .env)</small></label>
+        <input type="password" name="senha" value="" autocomplete="new-password"
+               placeholder="{{ '•••••••• (salva — deixe vazio para usar)' if tem_senha_salva else '' }}">
+      </div>
+      <div>
+        <label>Segurança da conexão</label>
+        <select name="seguranca">
+          <option value="nenhuma" {{ 'selected' if d.seguranca == 'nenhuma' }}>Nenhuma (rede interna)</option>
+          <option value="starttls" {{ 'selected' if d.seguranca == 'starttls' }}>STARTTLS</option>
+          <option value="ssl" {{ 'selected' if d.seguranca == 'ssl' }}>SSL/TLS direto</option>
+        </select>
+      </div>
+      <div style="align-self:end">
+        <label class="check"><input type="checkbox" name="ignorar_certificado" {{ 'checked' if d.ignorar_certificado }}> Aceitar certificado autoassinado</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Dados do e-mail</h2>
+    <p class="dica">O remetente precisa ser a caixa liberada (ALLOWED_SENDERS). O destino pode ser qualquer e-mail externo, como seu Gmail.</p>
+    <div class="grade">
+      <div>
+        <label>E-mail do remetente</label>
+        <input type="email" name="remetente" value="{{ d.remetente }}" required>
+      </div>
+      <div>
+        <label>Nome do remetente</label>
+        <input type="text" name="nome_remetente" value="{{ d.nome_remetente }}">
+      </div>
+      <div>
+        <label>E-mail de destino <small>(cliente)</small></label>
+        <input type="email" name="destinatario" value="{{ d.destinatario }}" placeholder="seuemail@gmail.com" required>
+      </div>
+      <div>
+        <label>Número da nota (teste)</label>
+        <input type="text" name="numero" value="{{ d.numero }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="acoes">
+    <button type="submit" name="acao" value="enviar">Enviar nota fiscal de teste</button>
+    <button type="submit" name="acao" value="testar" class="secundario" formnovalidate
+            title="Conecta, faz o login e confere o remetente, sem enviar e-mail">Testar comunicação</button>
+    <button type="submit" name="acao" value="salvar" class="secundario" formnovalidate>Salvar configurações</button>
+    <label class="check"><input type="checkbox" name="salvar_senha" {{ 'checked' if d.salvar_senha }}> Salvar também a senha <small>(fica gravada em texto no container)</small></label>
+  </div>
+</form>
+
+{% if r and r.log %}
+  <div class="card" style="margin-top:20px">
+    <h2>Conversa SMTP (para investigar problemas)</h2>
+    <p class="dica">"send" = o que a aplicação falou; "reply" = o que a ponte respondeu. Códigos 2xx = OK, 4xx = tente de novo, 5xx = erro.</p>
+    <pre>{{ r.log }}</pre>
+  </div>
+{% endif %}
+
+</main>
+</body>
+</html>
